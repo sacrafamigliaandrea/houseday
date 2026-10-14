@@ -32,7 +32,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
-    <!-- TOP BAR / BANNER COMPLETO -->
+    <!-- TOP BAR / BANNER -->
     <header class="shrink-0 w-full relative overflow-hidden rounded-b-3xl shadow-lg leading-none bg-transparent">
         <img 
             src="banner.jpg" 
@@ -54,7 +54,7 @@
             <!-- Schede generate da JavaScript -->
         </section>
 
-        <!-- SEZIONE CLASSIFICA (SENZA MEMBRI E PUNTI) -->
+        <!-- SEZIONE CLASSIFICA -->
         <section class="flex-1 glass-panel rounded-3xl overflow-hidden flex flex-col border border-slate-200/80 shadow-md min-h-[380px]">
             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-4 text-center shrink-0 shadow-sm">
                 <h2 class="text-base sm:text-lg font-bold tracking-wide">Classifica - 14/10/2026</h2>
@@ -157,7 +157,7 @@
 
                 if (members > 0) {
                     efficiency = (points / maxPoints) * 100;
-                    if (efficiency > 100) efficiency = 100; 
+                    // Rimosso il blocco a 100: l'efficienza ora può superare il 100%
                 }
 
                 results.push({
@@ -170,6 +170,7 @@
                 });
             });
 
+            // Ordinamento per efficienza e poi per punti totali
             results.sort((a, b) => b.efficiency - a.efficiency || b.points - a.points);
 
             leaderboardBody.innerHTML = '';
