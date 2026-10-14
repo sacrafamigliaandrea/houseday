@@ -2,86 +2,107 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>House Day</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8fafc;
-            overflow: hidden;
-            touch-action: none;
+            min-height: 100vh;
         }
+
         .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.05);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 18px 0 rgba(15, 23, 42, 0.05);
         }
+
         .no-select {
             -webkit-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
         }
+
+        /* Top bar con altezza aumentata e senza filtro scuro */
         .header-banner {
             background-image: url('SfondoMACase.jpg');
             background-size: cover;
-            background-position: center 25%;
+            background-position: center center;
             background-repeat: no-repeat;
             position: relative;
         }
-        .header-overlay {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 1;
+
+        /* Sfondo luminoso e testo ben leggibile senza oscurare la foto */
+        .header-title-text {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 0, 0, 0.45);
         }
-        .header-content {
-            position: relative;
-            z-index: 2;
+
+        /* Scrollbar sottile e pulita per tabelle su mobile */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="h-screen w-screen p-0 m-0 text-slate-800 flex flex-col">
-    
-    <header class="header-banner shrink-0 h-[15vh] min-h-[80px] md:min-h-[100px] flex items-center justify-center rounded-b-3xl shadow-md mb-2 md:mb-3">
-        <div class="header-overlay rounded-b-3xl"></div>
-        <div class="header-content text-center w-full px-4">
-            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-lg leading-tight uppercase">House Day</h1>
+<body class="w-full min-h-screen text-slate-800 flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- HEADER: Più alto, senza ombreggiatura scura pesante -->
+    <header class="header-banner shrink-0 h-[22vh] min-h-[120px] md:min-h-[150px] flex items-center justify-center rounded-b-3xl shadow-sm mb-3 md:mb-4 px-4 overflow-hidden border-b border-slate-200">
+        <div class="relative z-10 text-center w-full max-w-4xl">
+            <h1 class="header-title-text text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-wide uppercase">
+                House Day
+            </h1>
+            <p class="text-white/95 text-xs sm:text-sm font-semibold tracking-wider mt-1 drop-shadow">
+                Pannello Gestione Punti & Classifica
+            </p>
         </div>
     </header>
 
-    <div class="flex-grow flex flex-col lg:flex-row gap-2 md:gap-3 overflow-hidden h-full px-2 md:px-3 pb-2 md:pb-3">
+    <!-- MAIN WRAPPER: Scrollabile liberamente su mobile, griglia compatta su desktop -->
+    <main class="flex-grow flex flex-col lg:flex-row gap-3 md:gap-4 px-3 sm:px-4 pb-4 max-w-7xl mx-auto w-full">
         
-        <!-- SEZIONE INPUT -->
-        <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-2 md:gap-3 h-full" id="team-inputs">
-            <!-- JS -->
-        </div>
+        <!-- SEZIONE INPUT SQUADRE -->
+        <section class="flex-1 w-full" aria-label="Inserimento dati squadre">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 h-full" id="team-inputs">
+                <!-- Generato via JavaScript -->
+            </div>
+        </section>
 
         <!-- SEZIONE CLASSIFICA -->
-        <div class="flex-1 glass-panel rounded-2xl flex flex-col overflow-hidden h-full border border-slate-200">
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-1.5 md:py-2 shrink-0">
-                <h2 class="text-base md:text-lg font-bold text-center tracking-wide">Classifica - 14/10/2026</h2>
+        <section class="flex-1 w-full flex flex-col glass-panel rounded-2xl overflow-hidden border border-slate-200 shadow-sm" aria-label="Classifica in tempo reale">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-2.5 px-4 shrink-0 flex items-center justify-between">
+                <h2 class="text-sm sm:text-base font-bold tracking-wide flex items-center gap-2">
+                    <span>🏆</span> Classifica Generale
+                </h2>
+                <span class="text-[11px] sm:text-xs text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700">14/10/2026</span>
             </div>
-            <div class="flex-grow flex flex-col p-1.5 md:p-2 h-full">
-                <table class="w-full h-full text-left border-collapse">
+            
+            <div class="flex-grow p-2 sm:p-3 overflow-x-auto custom-scrollbar flex flex-col justify-start">
+                <table class="w-full min-w-[340px] border-collapse text-left">
                     <thead>
-                        <tr class="text-[10px] md:text-xs uppercase tracking-widest text-slate-400 border-b border-slate-200 h-[10%]">
-                            <th class="font-semibold text-center w-10">Pos</th>
-                            <th class="font-semibold pl-2">Squadra</th>
-                            <th class="font-semibold text-center">Membri</th>
-                            <th class="font-semibold text-center">Punti</th>
-                            <th class="font-semibold text-right pr-3">Efficienza</th>
+                        <tr class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 border-b border-slate-200 pb-2">
+                            <th class="font-semibold text-center w-8 sm:w-10 py-2">Pos</th>
+                            <th class="font-semibold pl-1.5 sm:pl-2 py-2">Squadra</th>
+                            <th class="font-semibold text-center py-2">Membri</th>
+                            <th class="font-semibold text-center py-2">Punti</th>
+                            <th class="font-semibold text-right pr-2 sm:pr-3 py-2">Efficienza</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body" class="divide-y divide-slate-100">
-                        <!-- JS -->
+                        <!-- Popolato dinamicamente -->
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
         
-    </div>
+    </main>
 
     <script>
         const teams = [
@@ -92,10 +113,30 @@
         ];
 
         const colors = {
-            blue: { bg: 'bg-blue-50/70', border: 'border-blue-200', text: 'text-blue-900', badge: 'bg-blue-100 text-blue-800' },
-            yellow: { bg: 'bg-amber-50/70', border: 'border-amber-200', text: 'text-amber-900', badge: 'bg-amber-100 text-amber-800' },
-            red: { bg: 'bg-rose-50/70', border: 'border-rose-200', text: 'text-rose-900', badge: 'bg-rose-100 text-rose-800' },
-            green: { bg: 'bg-emerald-50/70', border: 'border-emerald-200', text: 'text-emerald-900', badge: 'bg-emerald-100 text-emerald-800' }
+            blue: { 
+                bg: 'bg-blue-50/80', 
+                border: 'border-blue-200', 
+                text: 'text-blue-900', 
+                badge: 'bg-blue-100 text-blue-800 border border-blue-200' 
+            },
+            yellow: { 
+                bg: 'bg-amber-50/80', 
+                border: 'border-amber-200', 
+                text: 'text-amber-900', 
+                badge: 'bg-amber-100 text-amber-800 border border-amber-200' 
+            },
+            red: { 
+                bg: 'bg-rose-50/80', 
+                border: 'border-rose-200', 
+                text: 'text-rose-900', 
+                badge: 'bg-rose-100 text-rose-800 border border-rose-200' 
+            },
+            green: { 
+                bg: 'bg-emerald-50/80', 
+                border: 'border-emerald-200', 
+                text: 'text-emerald-900', 
+                badge: 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+            }
         };
 
         const state = {
@@ -108,31 +149,35 @@
         const inputsContainer = document.getElementById('team-inputs');
         const leaderboardBody = document.getElementById('leaderboard-body');
 
+        // Generazione tessere squadre per mobile e desktop
         teams.forEach(team => {
             const c = colors[team.color];
             const card = document.createElement('div');
-            card.className = `glass-panel p-2 md:p-3 rounded-2xl border ${c.border} ${c.bg} flex flex-col justify-center h-full w-full shadow-sm gap-2`;
+            card.className = `glass-panel p-2.5 sm:p-3 rounded-2xl border ${c.border} ${c.bg} flex flex-col justify-between shadow-sm gap-2`;
             card.innerHTML = `
-                <h3 class="text-base md:text-xl font-bold ${c.text} text-center tracking-tight leading-none">${team.name}</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm sm:text-base font-bold ${c.text} tracking-tight">${team.name}</h3>
+                    <span class="w-3 h-3 rounded-full ${team.color === 'blue' ? 'bg-blue-500' : team.color === 'yellow' ? 'bg-amber-400' : team.color === 'red' ? 'bg-rose-500' : 'bg-emerald-500'}"></span>
+                </div>
                 
-                <div class="flex flex-col justify-center gap-2 md:gap-3 w-full mt-1">
+                <div class="flex flex-col gap-2 w-full mt-0.5">
                     <!-- Riga Membri -->
-                    <div class="flex flex-row items-center justify-between bg-white/60 p-1.5 md:p-2 rounded-2xl border border-white/50 w-full shadow-sm">
-                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Membri</span>
-                        <div class="flex items-center gap-2">
-                            <button class="no-select w-8 h-8 md:w-11 md:h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-600 text-xl font-bold active:bg-slate-200 active:scale-95 flex items-center justify-center transition-transform" onclick="updateVal('${team.id}', 'members', -1)">-</button>
-                            <span id="members-${team.id}-val" class="w-6 md:w-8 text-center font-bold text-lg md:text-2xl text-slate-800 no-select">0</span>
-                            <button class="no-select w-8 h-8 md:w-11 md:h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-600 text-xl font-bold active:bg-slate-200 active:scale-95 flex items-center justify-center transition-transform" onclick="updateVal('${team.id}', 'members', 1)">+</button>
+                    <div class="flex flex-row items-center justify-between bg-white/80 px-2.5 py-1.5 rounded-xl border border-white/60 shadow-xs">
+                        <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">Membri</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button type="button" aria-label="Rimuovi membro" class="no-select w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-50 border border-slate-200 shadow-xs text-slate-700 text-lg font-bold hover:bg-slate-100 active:bg-slate-200 active:scale-95 flex items-center justify-center transition-all cursor-pointer" onclick="updateVal('${team.id}', 'members', -1)">−</button>
+                            <span id="members-${team.id}-val" class="w-7 sm:w-8 text-center font-bold text-base sm:text-xl text-slate-800 no-select">0</span>
+                            <button type="button" aria-label="Aggiungi membro" class="no-select w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-50 border border-slate-200 shadow-xs text-slate-700 text-lg font-bold hover:bg-slate-100 active:bg-slate-200 active:scale-95 flex items-center justify-center transition-all cursor-pointer" onclick="updateVal('${team.id}', 'members', 1)">+</button>
                         </div>
                     </div>
                     
                     <!-- Riga Punti -->
-                    <div class="flex flex-row items-center justify-between bg-white/60 p-1.5 md:p-2 rounded-2xl border border-white/50 w-full shadow-sm">
-                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Punti</span>
-                        <div class="flex items-center gap-2">
-                            <button class="no-select w-8 h-8 md:w-11 md:h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-600 text-xl font-bold active:bg-slate-200 active:scale-95 flex items-center justify-center transition-transform" onclick="updateVal('${team.id}', 'points', -1)">-</button>
-                            <span id="points-${team.id}-val" class="w-6 md:w-8 text-center font-bold text-lg md:text-2xl text-slate-800 no-select">0</span>
-                            <button class="no-select w-8 h-8 md:w-11 md:h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-600 text-xl font-bold active:bg-slate-200 active:scale-95 flex items-center justify-center transition-transform" onclick="updateVal('${team.id}', 'points', 1)">+</button>
+                    <div class="flex flex-row items-center justify-between bg-white/80 px-2.5 py-1.5 rounded-xl border border-white/60 shadow-xs">
+                        <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">Punti</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button type="button" aria-label="Riduci punti" class="no-select w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-50 border border-slate-200 shadow-xs text-slate-700 text-lg font-bold hover:bg-slate-100 active:bg-slate-200 active:scale-95 flex items-center justify-center transition-all cursor-pointer" onclick="updateVal('${team.id}', 'points', -1)">−</button>
+                            <span id="points-${team.id}-val" class="w-7 sm:w-8 text-center font-bold text-base sm:text-xl text-slate-800 no-select">0</span>
+                            <button type="button" aria-label="Aumenta punti" class="no-select w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-50 border border-slate-200 shadow-xs text-slate-700 text-lg font-bold hover:bg-slate-100 active:bg-slate-200 active:scale-95 flex items-center justify-center transition-all cursor-pointer" onclick="updateVal('${team.id}', 'points', 1)">+</button>
                         </div>
                     </div>
                 </div>
@@ -148,7 +193,8 @@
             
             state[teamId][type] = newVal;
             
-            document.getElementById(`${type}-${teamId}-val`).innerText = newVal;
+            const label = document.getElementById(`${type}-${teamId}-val`);
+            if (label) label.innerText = newVal;
             
             calculate();
         }
@@ -178,6 +224,7 @@
                 });
             });
 
+            // Ordinamento per efficienza decrescente, poi per punti totali
             results.sort((a, b) => b.efficiency - a.efficiency || b.points - a.points);
 
             leaderboardBody.innerHTML = '';
@@ -200,44 +247,46 @@
                 const c = colors[res.team.color];
                 const tr = document.createElement('tr');
                 
-                tr.className = `transition-colors hover:bg-slate-50/80 h-[22.5%]`; 
+                tr.className = `transition-colors hover:bg-slate-50/70 border-b border-slate-100 last:border-b-0`; 
                 
                 let posBadge = 'bg-slate-100 text-slate-400';
                 let posTrophy = '';
                 
                 if (res.hasData) {
                     if (res.actualRank === 1) {
-                        posBadge = 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900 shadow ring-1 ring-yellow-200 ring-offset-1';
-                        posTrophy = '🏆';
+                        posBadge = 'bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 shadow-xs font-bold';
+                        posTrophy = '👑';
                     } else if (res.actualRank === 2) {
-                        posBadge = 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-700 shadow-sm';
+                        posBadge = 'bg-slate-200 text-slate-700 shadow-xs';
                     } else if (res.actualRank === 3) {
-                        posBadge = 'bg-gradient-to-br from-orange-200 to-orange-300 text-orange-800 shadow-sm';
+                        posBadge = 'bg-orange-200 text-orange-900 shadow-xs';
                     } else {
-                        posBadge = 'bg-white border border-slate-200 text-slate-500 shadow-sm';
+                        posBadge = 'bg-white border border-slate-200 text-slate-600 shadow-xs';
                     }
                 }
 
                 tr.innerHTML = `
-                    <td class="text-center">
-                        <span class="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full font-bold text-xs md:text-sm ${posBadge}">
+                    <td class="text-center py-2.5">
+                        <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full font-bold text-xs ${posBadge}">
                             ${res.hasData ? res.actualRank : '-'}
                         </span>
                     </td>
-                    <td class="font-bold text-sm md:text-lg ${c.text} flex items-center h-full gap-2 pl-2">
-                        <span>${res.team.name}</span> 
-                        ${res.hasData ? `<span class="inline-flex items-center justify-center bg-slate-800 text-white text-[10px] md:text-xs font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded-full shadow-sm">+${res.rankPts}</span>` : ''}
-                        ${res.actualRank === 1 && res.hasData ? `<span>${posTrophy}</span>` : ''}
-                    </td>
-                    <td class="text-center text-slate-600 font-medium text-sm md:text-xl">${res.hasData ? res.members : '-'}</td>
-                    <td class="text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <span class="font-bold text-sm md:text-xl text-slate-700">${res.hasData ? res.points : '-'}</span>
-                            ${res.hasData ? `<span class="text-[8px] md:text-[9px] uppercase tracking-wider text-slate-400 font-semibold leading-none">${res.maxPoints} MAX</span>` : ''}
+                    <td class="font-bold text-xs sm:text-sm ${c.text} pl-1.5 sm:pl-2 py-2.5">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span>${res.team.name}</span>
+                            ${res.hasData ? `<span class="inline-flex items-center bg-slate-800 text-white text-[10px] font-semibold px-1.5 py-0.2 rounded-full">+${res.rankPts}</span>` : ''}
+                            ${res.actualRank === 1 && res.hasData ? `<span class="text-xs">${posTrophy}</span>` : ''}
                         </div>
                     </td>
-                    <td class="text-right pr-3">
-                        <span class="inline-block px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold text-xs md:text-base tracking-wide ${res.hasData ? c.badge : 'bg-slate-50 text-slate-300 border border-slate-100'}">
+                    <td class="text-center text-slate-600 font-semibold text-xs sm:text-sm py-2.5">${res.hasData ? res.members : '-'}</td>
+                    <td class="text-center py-2.5">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="font-bold text-xs sm:text-sm text-slate-700">${res.hasData ? res.points : '-'}</span>
+                            ${res.hasData ? `<span class="text-[8px] uppercase text-slate-400 font-medium">${res.maxPoints} max</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="text-right pr-2 sm:pr-3 py-2.5">
+                        <span class="inline-block px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md font-bold text-xs sm:text-sm ${res.hasData ? c.badge : 'bg-slate-50 text-slate-300 border border-slate-100'}">
                             ${res.hasData ? res.efficiency.toFixed(1) + '%' : '-'}
                         </span>
                     </td>
@@ -246,6 +295,7 @@
             });
         }
 
+        // Calcolo iniziale
         calculate();
     </script>
 </body>
