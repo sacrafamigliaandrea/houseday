@@ -25,24 +25,23 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        .header-banner {
-            background-image: url('banner.jpg');
-            background-size: cover;
-            background-position: center top;
-            background-repeat: no-repeat;
-            position: relative;
-        }
         .banner-text-glow {
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 0 4px rgba(0, 0, 0, 0.9);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
-    <!-- TOP BAR / BANNER -->
-    <header class="header-banner shrink-0 w-full h-44 sm:h-52 md:h-64 lg:h-72 rounded-b-3xl shadow-lg flex items-end justify-center pb-3 sm:pb-4 transition-all">
-        <div class="relative z-10 text-center px-4 w-full">
-            <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-wider banner-text-glow">
+    <!-- TOP BAR / BANNER COMPLETO E RESPONSIVO -->
+    <header class="shrink-0 w-full relative overflow-hidden rounded-b-3xl shadow-lg bg-slate-900">
+        <img 
+            src="banner.jpg" 
+            alt="Mascotte Case" 
+            class="w-full h-auto aspect-[1000/333] object-contain block rounded-b-3xl"
+        >
+        <!-- Titolo posizionato sopra il banner in basso al centro -->
+        <div class="absolute bottom-1 sm:bottom-3 inset-x-0 text-center px-2 pointer-events-none z-10">
+            <h1 class="text-xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-wider banner-text-glow">
                 House Day
             </h1>
         </div>
@@ -90,9 +89,10 @@
             { id: 'querciaverde', name: 'QuerciaVerde', color: 'green' }
         ];
 
+        // Colori aggiornati: CeroGiallo con un giallo vivo e definito (text-yellow-600 / text-amber-500)
         const colors = {
             blue: { bg: 'bg-blue-50/80', border: 'border-blue-200', text: 'text-blue-900', badge: 'bg-blue-100 text-blue-800' },
-            yellow: { bg: 'bg-amber-50/80', border: 'border-amber-200', text: 'text-amber-900', badge: 'bg-amber-100 text-amber-800' },
+            yellow: { bg: 'bg-amber-50/80', border: 'border-yellow-300', text: 'text-yellow-600', badge: 'bg-yellow-100 text-yellow-800' },
             red: { bg: 'bg-rose-50/80', border: 'border-rose-200', text: 'text-rose-900', badge: 'bg-rose-100 text-rose-800' },
             green: { bg: 'bg-emerald-50/80', border: 'border-emerald-200', text: 'text-emerald-900', badge: 'bg-emerald-100 text-emerald-800' }
         };
@@ -112,7 +112,7 @@
             const card = document.createElement('div');
             card.className = `glass-panel p-3.5 sm:p-4 rounded-2xl border ${c.border} ${c.bg} flex flex-col justify-between shadow-sm gap-3`;
             card.innerHTML = `
-                <h3 class="text-lg sm:text-xl font-bold ${c.text} text-center tracking-tight leading-tight">${team.name}</h3>
+                <h3 class="text-lg sm:text-xl font-extrabold ${c.text} text-center tracking-tight leading-tight">${team.name}</h3>
                 
                 <div class="flex flex-col gap-2.5 w-full">
                     <!-- Riga Membri -->
@@ -219,7 +219,7 @@
                             ${res.hasData ? res.actualRank : '-'}
                         </span>
                     </td>
-                    <td class="font-bold text-sm sm:text-base ${c.text} pl-2 py-3">
+                    <td class="font-extrabold text-sm sm:text-base ${c.text} pl-2 py-3">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span>${res.team.name}</span> 
                             ${res.hasData ? `<span class="inline-flex items-center justify-center bg-slate-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">+${res.rankPts}</span>` : ''}
