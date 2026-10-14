@@ -28,11 +28,20 @@
         .banner-text-glow {
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
         }
+        /* Nasconde le freccette native dei campi numerici per mantenere l'interfaccia pulita */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
-    <!-- TOP BAR / BANNER -->
+    <!-- TOP BAR / BANNER COMPLETO -->
     <header class="shrink-0 w-full relative overflow-hidden rounded-b-3xl shadow-lg leading-none bg-transparent">
         <img 
             src="banner.jpg" 
@@ -106,7 +115,7 @@
         teams.forEach(team => {
             const c = colors[team.color];
             const card = document.createElement('div');
-            card.className = `glass-panel p-3.5 sm:p-4 rounded-2xl border ${c.border} ${c.bg} flex flex-col justify-between shadow-sm gap-3`;
+            card.className = `glass-panel p-3.5 sm:p-4 rounded-2xl border ${c.border}${c.bg} flex flex-col justify-between shadow-sm gap-3`;
             card.innerHTML = `
                 <h3 class="text-lg sm:text-xl font-extrabold ${c.text} text-center tracking-tight leading-tight">${team.name}</h3>
                 
@@ -114,20 +123,36 @@
                     <!-- Riga Membri -->
                     <div class="flex items-center justify-between bg-white/80 px-3 py-2 rounded-xl border border-white/60 shadow-xs">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Membri</span>
-                        <div class="flex items-center gap-2">
-                            <button class="no-select w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all" onclick="updateVal('${team.id}', 'members', -1)">-</button>
-                            <span id="members-${team.id}-val" class="w-7 sm:w-8 text-center font-bold text-lg sm:text-xl text-slate-800 no-select">0</span>
-                            <button class="no-select w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all" onclick="updateVal('${team.id}', 'members', 1)">+</button>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'members', -1)">-</button>
+                            <input 
+                                type="number" 
+                                id="members-${team.id}-val" 
+                                value="0" 
+                                min="0" 
+                                class="w-16 sm:w-20 text-center font-bold text-base sm:text-xl text-slate-800 bg-white/90 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none rounded-lg py-1 transition-all"
+                                oninput="onDirectInput('${team.id}', 'members', this.value)"
+                                onfocus="this.select()"
+                            >
+                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'members', 1)">+</button>
                         </div>
                     </div>
                     
                     <!-- Riga Punti -->
                     <div class="flex items-center justify-between bg-white/80 px-3 py-2 rounded-xl border border-white/60 shadow-xs">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Punti</span>
-                        <div class="flex items-center gap-2">
-                            <button class="no-select w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all" onclick="updateVal('${team.id}', 'points', -1)">-</button>
-                            <span id="points-${team.id}-val" class="w-7 sm:w-8 text-center font-bold text-lg sm:text-xl text-slate-800 no-select">0</span>
-                            <button class="no-select w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all" onclick="updateVal('${team.id}', 'points', 1)">+</button>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'points', -1)">-</button>
+                            <input 
+                                type="number" 
+                                id="points-${team.id}-val" 
+                                value="0" 
+                                min="0" 
+                                class="w-16 sm:w-20 text-center font-bold text-base sm:text-xl text-slate-800 bg-white/90 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none rounded-lg py-1 transition-all"
+                                oninput="onDirectInput('${team.id}', 'points', this.value)"
+                                onfocus="this.select()"
+                            >
+                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'points', 1)">+</button>
                         </div>
                     </div>
                 </div>
@@ -135,13 +160,24 @@
             inputsContainer.appendChild(card);
         });
 
+        // Modifica tramite pulsanti + e -
         function updateVal(teamId, type, delta) {
             let current = state[teamId][type];
             let newVal = current + delta;
             if (newVal < 0) newVal = 0;
             
             state[teamId][type] = newVal;
-            document.getElementById(`${type}-${teamId}-val`).innerText = newVal;
+            document.getElementById(`${type}-${teamId}-val`).value = newVal;
+            calculate();
+        }
+
+        // Modifica diretta da tastiera
+        function onDirectInput(teamId, type, value) {
+            let parsedVal = parseInt(value, 10);
+            if (isNaN(parsedVal) || parsedVal < 0) {
+                parsedVal = 0;
+            }
+            state[teamId][type] = parsedVal;
             calculate();
         }
 
@@ -157,7 +193,6 @@
 
                 if (members > 0) {
                     efficiency = (points / maxPoints) * 100;
-                    // Rimosso il blocco a 100: l'efficienza ora può superare il 100%
                 }
 
                 results.push({
@@ -170,7 +205,7 @@
                 });
             });
 
-            // Ordinamento per efficienza e poi per punti totali
+            // Ordinamento per efficienza e spareggio sui punti assoluti
             results.sort((a, b) => b.efficiency - a.efficiency || b.points - a.points);
 
             leaderboardBody.innerHTML = '';
@@ -218,22 +253,9 @@
                     </td>
                     <td class="font-extrabold text-sm sm:text-base ${c.text} pl-3 py-3.5">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span>${res.team.name}</span> 
-                            ${res.hasData ? `<span class="inline-flex items-center justify-center bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-xs">+${res.rankPts}</span>` : ''}
+                            <span>${res.team.name}</span>${res.hasData ? `<span class="inline-flex items-center justify-center bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-xs">+${res.rankPts}</span>` : ''}
                             ${res.actualRank === 1 && res.hasData ? `<span class="text-base">${posTrophy}</span>` : ''}
                         </div>
                     </td>
                     <td class="text-right pr-3 py-3.5">
-                        <span class="inline-block px-2.5 sm:px-3 py-1 rounded-lg font-bold text-xs sm:text-sm tracking-wide ${res.hasData ? c.badge : 'bg-slate-100 text-slate-400'}">
-                            ${res.hasData ? res.efficiency.toFixed(1) + '%' : '-'}
-                        </span>
-                    </td>
-                `;
-                leaderboardBody.appendChild(tr);
-            });
-        }
-
-        calculate();
-    </script>
-</body>
-</html>
+                        <span class="inline-block px-2.5 sm:px-3
