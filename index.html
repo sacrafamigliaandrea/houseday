@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Day</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Libreria per esportazione immagine ad alta risoluzione -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
         body {
@@ -28,7 +30,6 @@
         .banner-text-glow {
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
         }
-        /* Nasconde le freccette native dei campi numerici per mantenere l'interfaccia pulita */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -63,27 +64,64 @@
             <!-- Schede generate da JavaScript -->
         </section>
 
-        <!-- SEZIONE CLASSIFICA -->
-        <section class="flex-1 glass-panel rounded-3xl overflow-hidden flex flex-col border border-slate-200/80 shadow-md min-h-[380px]">
-            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-4 text-center shrink-0 shadow-sm">
-                <h2 class="text-base sm:text-lg font-bold tracking-wide">Classifica - 14/10/2026</h2>
-            </div>
+        <!-- SEZIONE CLASSIFICA DA ESPORTARE -->
+        <div class="flex-1 flex flex-col gap-2">
             
-            <div class="p-3 sm:p-4 flex-grow overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[280px]">
-                    <thead>
-                        <tr class="text-[11px] sm:text-xs uppercase tracking-wider text-slate-400 border-b border-slate-200/80 pb-2">
-                            <th class="font-bold text-center w-12 pb-2">Pos</th>
-                            <th class="font-bold pl-3 pb-2">Squadra</th>
-                            <th class="font-bold text-right pr-3 pb-2">Efficienza</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body" class="divide-y divide-slate-100">
-                        <!-- Righe generate da JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <!-- CARD CLASSIFICA EFFETTIVA -->
+            <section id="leaderboard-card" class="glass-panel rounded-3xl overflow-hidden flex flex-col border border-slate-200/80 shadow-md min-h-[380px] bg-white">
+                <!-- Barra del titolo con Classe modificabile -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-3 sm:px-4 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <span class="text-xs sm:text-sm font-semibold text-slate-300 uppercase tracking-wide">Classifica</span>
+                        <!-- Input classe interattivo -->
+                        <div class="inline-flex items-center bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-0.5">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Classe:</span>
+                            <input 
+                                type="text" 
+                                id="class-name-input" 
+                                value="1A" 
+                                placeholder="Es. 2B"
+                                class="bg-transparent text-amber-300 font-extrabold text-xs sm:text-sm focus:outline-none w-16 sm:w-20 tracking-wide"
+                                oninput="syncCardName(this.value)"
+                            >
+                        </div>
+                    </div>
+                    <span class="text-[11px] sm:text-xs text-slate-300 font-medium">14/10/2026</span>
+                </div>
+                
+                <div class="p-3 sm:p-4 flex-grow overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[280px]">
+                        <thead>
+                            <tr class="text-[11px] sm:text-xs uppercase tracking-wider text-slate-400 border-b border-slate-200/80 pb-2">
+                                <th class="font-bold text-center w-12 pb-2">Pos</th>
+                                <th class="font-bold pl-3 pb-2">Squadra</th>
+                                <th class="font-bold text-right pr-3 pb-2">Efficienza</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body" class="divide-y divide-slate-100">
+                            <!-- Righe generate da JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer visivo nella card per l'esportazione -->
+                <div class="bg-slate-50 border-t border-slate-100 px-4 py-2 text-center text-[10px] text-slate-400 font-medium">
+                    House Day • Scuola Sacra Famiglia
+                </div>
+            </section>
+
+            <!-- PULSANTE ESPORTAZIONE / CONDIVISIONE IMMAGINE -->
+            <button 
+                id="btn-export"
+                onclick="exportLeaderboardImage()"
+                class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>Salva Card Classifica (PNG)</span>
+            </button>
+        </div>
         
     </main>
 
@@ -160,23 +198,18 @@
             inputsContainer.appendChild(card);
         });
 
-        // Modifica tramite pulsanti + e -
         function updateVal(teamId, type, delta) {
             let current = state[teamId][type];
             let newVal = current + delta;
             if (newVal < 0) newVal = 0;
-            
             state[teamId][type] = newVal;
             document.getElementById(`${type}-${teamId}-val`).value = newVal;
             calculate();
         }
 
-        // Modifica diretta da tastiera
         function onDirectInput(teamId, type, value) {
             let parsedVal = parseInt(value, 10);
-            if (isNaN(parsedVal) || parsedVal < 0) {
-                parsedVal = 0;
-            }
+            if (isNaN(parsedVal) || parsedVal < 0) parsedVal = 0;
             state[teamId][type] = parsedVal;
             calculate();
         }
@@ -205,9 +238,7 @@
                 });
             });
 
-            // Ordinamento per efficienza e spareggio sui punti assoluti
             results.sort((a, b) => b.efficiency - a.efficiency || b.points - a.points);
-
             leaderboardBody.innerHTML = '';
             
             results.forEach((res, index) => {
@@ -266,6 +297,69 @@
                 `;
                 leaderboardBody.appendChild(tr);
             });
+        }
+
+        // Funzione per esportare la sola card della classifica come PNG
+        async function exportLeaderboardImage() {
+            const card = document.getElementById('leaderboard-card');
+            const className = (document.getElementById('class-name-input').value.trim() || 'Generale').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const fileName = `Classifica_HouseDay_${className}_14-10-2026.png`;
+
+            const btn = document.getElementById('btn-export');
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = `<span>Generazione in corso...</span>`;
+            btn.disabled = true;
+
+            try {
+                // Cattura la card a scala 2x per garantire nitidezza su retina display
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true
+                });
+
+                // Tentativo di salvataggio diretto o condivisione nativa (mobile)
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        fallbackDownload(canvas, fileName);
+                        return;
+                    }
+
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
+                    // Se siamo su smartphone con supporto Web Share (apre "Salva immagine" o AirDrop/WhatsApp)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Classifica House Day',
+                                text: `Classifica House Day - Classe ${className}`
+                            });
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                fallbackDownload(canvas, fileName);
+                            }
+                        }
+                    } else {
+                        // Download classico per browser desktop
+                        fallbackDownload(canvas, fileName);
+                    }
+                }, 'image/png');
+
+            } catch (error) {
+                console.error("Errore esportazione immagine:", error);
+                alert("Si è verificato un errore durante la creazione dell'immagine.");
+            } finally {
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        }
+
+        function fallbackDownload(canvas, fileName) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         }
 
         calculate();
