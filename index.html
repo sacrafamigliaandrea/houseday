@@ -69,20 +69,19 @@
             
             <!-- CARD CLASSIFICA EFFETTIVA -->
             <section id="leaderboard-card" class="glass-panel rounded-3xl overflow-hidden flex flex-col border border-slate-200/80 shadow-md min-h-[380px] bg-white">
-                <!-- Barra del titolo con Classe modificabile -->
+                <!-- Barra del titolo con Campo Classe libero -->
                 <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-3 sm:px-4 flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <span class="text-xs sm:text-sm font-semibold text-slate-300 uppercase tracking-wide">Classifica</span>
-                        <!-- Input classe interattivo -->
+                        <!-- Input classe libero -->
                         <div class="inline-flex items-center bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-0.5">
                             <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Classe:</span>
                             <input 
                                 type="text" 
                                 id="class-name-input" 
-                                value="1A" 
-                                placeholder="Es. 2B"
-                                class="bg-transparent text-amber-300 font-extrabold text-xs sm:text-sm focus:outline-none w-16 sm:w-20 tracking-wide"
-                                oninput="syncCardName(this.value)"
+                                value="" 
+                                placeholder=""
+                                class="bg-transparent text-amber-300 font-extrabold text-xs sm:text-sm focus:outline-none w-20 sm:w-28 tracking-wide"
                             >
                         </div>
                     </div>
@@ -110,16 +109,16 @@
                 </div>
             </section>
 
-            <!-- PULSANTE ESPORTAZIONE / CONDIVISIONE IMMAGINE -->
+            <!-- PULSANTE DOWNLOAD DIRETTO IN LOCALE -->
             <button 
                 id="btn-export"
                 onclick="exportLeaderboardImage()"
-                class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm"
+                class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm cursor-pointer"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                <span>Salva Card Classifica (PNG)</span>
+                <span>Scarica Card Classifica (PNG)</span>
             </button>
         </div>
         
@@ -299,67 +298,41 @@
             });
         }
 
-        // Funzione per esportare la sola card della classifica come PNG
+        // Download diretto del file PNG in locale
         async function exportLeaderboardImage() {
             const card = document.getElementById('leaderboard-card');
-            const className = (document.getElementById('class-name-input').value.trim() || 'Generale').replace(/[^a-zA-Z0-9_-]/g, '_');
-            const fileName = `Classifica_HouseDay_${className}_14-10-2026.png`;
+            const classVal = document.getElementById('class-name-input').value.trim();
+            const classSuffix = classVal ? `_${classVal.replace(/[^a-zA-Z0-9_-]/g, '_')}` : '';
+            const fileName = `Classifica_HouseDay${classSuffix}_14-10-2026.png`;
 
             const btn = document.getElementById('btn-export');
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = `<span>Generazione in corso...</span>`;
+            const originalBtnContent = btn.innerHTML;
+            btn.innerHTML = `<span>Download in corso...</span>`;
             btn.disabled = true;
 
             try {
-                // Cattura la card a scala 2x per garantire nitidezza su retina display
                 const canvas = await html2canvas(card, {
                     scale: 2,
                     backgroundColor: '#ffffff',
                     useCORS: true
                 });
 
-                // Tentativo di salvataggio diretto o condivisione nativa (mobile)
-                canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        fallbackDownload(canvas, fileName);
-                        return;
-                    }
-
-                    const file = new File([blob], fileName, { type: 'image/png' });
-
-                    // Se siamo su smartphone con supporto Web Share (apre "Salva immagine" o AirDrop/WhatsApp)
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Classifica House Day',
-                                text: `Classifica House Day - Classe ${className}`
-                            });
-                        } catch (err) {
-                            if (err.name !== 'AbortError') {
-                                fallbackDownload(canvas, fileName);
-                            }
-                        }
-                    } else {
-                        // Download classico per browser desktop
-                        fallbackDownload(canvas, fileName);
-                    }
-                }, 'image/png');
+                // Creazione del link ed esecuzione immediata del download in locale
+                const imageURI = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.download = fileName;
+                downloadLink.href = imageURI;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
 
             } catch (error) {
-                console.error("Errore esportazione immagine:", error);
-                alert("Si è verificato un errore durante la creazione dell'immagine.");
+                console.error("Errore salvataggio PNG:", error);
+                alert("Si è verificato un errore durante la generazione dell'immagine.");
             } finally {
-                btn.innerHTML = originalBtnText;
+                btn.innerHTML = originalBtnContent;
                 btn.disabled = false;
             }
-        }
-
-        function fallbackDownload(canvas, fileName) {
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
         }
 
         calculate();
