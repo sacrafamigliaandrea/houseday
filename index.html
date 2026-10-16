@@ -521,6 +521,7 @@
         .btn-invia { padding-top: .75rem; padding-bottom: .75rem; background-color: var(--scuola); color: #fff; }
         .btn-invia:hover { background-color: var(--scuola-scuro); }
         .btn-invia:disabled { opacity: .6; cursor: wait; }
+        .btn-invia.bloccato:disabled { cursor: not-allowed; }
         .btn-invia svg { color: var(--ambra-300); }
         .btn-chiaro { background-color: #fff; color: var(--scuola); border-width: 1px; border-color: var(--grigio-200); }
         .btn-chiaro:hover { background-color: var(--scuola-chiaro); }
@@ -1417,9 +1418,11 @@
                     : { ok: true, classi: db.studenti.filter(r => r.data === p.data) };
             }
             if (p.action === 'classe') {
+                const gia = db.studenti.find(r => r.data === oggi && r.id === p.classe);
+                if (gia) return { ok: false, errore: 'gia', ora: gia.ora };
                 const riga = { data: oggi, ora, id: p.classe, case: {} };
                 teams.forEach(t => riga.case[t.id] = { m: Number(p['m_' + t.id]) || 0, p: Number(p['p_' + t.id]) || 0 });
-                db.studenti = db.studenti.filter(r => !(r.data === oggi && r.id === p.classe)).concat(riga);
+                db.studenti.push(riga);
                 salva();
                 return { ok: true, ora };
             }
@@ -1437,6 +1440,7 @@
             const errore = e && e.errore;
             if (errore === 'chiuso') return `L'inserimento è chiuso: si può inviare solo il venerdì dalle ${oraTesto(CALENDARIO.apertura)} alle ${oraTesto(CALENDARIO.chiusura)}.`;
             if (errore === 'classe') return 'Classe non riconosciuta: sceglila di nuovo dall\'elenco.';
+            if (errore === 'gia') return `Questa classe ha già inviato i punteggi${e.ora ? ' alle ' + esc(e.ora) : ''}: è possibile un solo invio per classe.`;
             if (errore === 'vuoto') return 'Inserisci i membri e i punti di almeno una Casa.';
             if (errore === 'nome') return 'Scrivi il tuo nome e cognome.';
             if (errore === 'casa') return 'Scegli la tua Casa.';
@@ -1570,7 +1574,7 @@
                 esportaPNG($('stud-giornata-card'), `HouseDay_Studenti_${dataBreve(statoHouseDay().data || adessoRoma().iso).replace(/\//g, '-')}.png`, $('stud-export')));
             $('stud-checklist').addEventListener('click', e => {
                 const b = e.target.closest('button[data-classe]');
-                if (!b || statoHouseDay().fase !== 'aperto') return;
+                if (!b || statoHouseDay().fase !== 'aperto' || stud.classi.some(c => c.id === b.dataset.classe)) return;
                 $('stud-classe').value = b.dataset.classe;
                 aggiornaClasseScelta();
                 salvaBozza();
@@ -1589,10 +1593,13 @@
             const id = $('stud-classe').value;
             $('stud-anteprima-classe').textContent = id ? etichettaClasse(id) : 'scegli la classe';
             $('stud-invia-testo').textContent = id ? `Invia i punteggi · ${etichettaClasse(id)}` : 'Invia i punteggi della classe';
+            // una classe che ha già inviato non può inviare di nuovo
             const gia = stud.classi.find(c => c.id === id);
             $('stud-nota-classe').innerHTML = gia
-                ? box('info', `Questa classe ha già inviato alle ${esc(gia.ora)}. Se invii di nuovo, i nuovi punteggi sostituiscono quelli di prima.`)
+                ? box('avviso', `Questa classe ha già inviato i punteggi alle ${esc(gia.ora)}: è possibile un solo invio per classe.`)
                 : '';
+            $('stud-invia').disabled = !!gia;
+            $('stud-invia').classList.toggle('bloccato', !!gia);
         }
 
         async function inviaClasse() {
@@ -1607,10 +1614,15 @@
                 esito('stud-esito', 'avviso', 'Inserisci i membri e i punti di almeno una Casa.');
                 return;
             }
+            const gia = stud.classi.find(c => c.id === id);
+            if (gia) {
+                esito('stud-esito', 'avviso', messaggioErrore({ errore: 'gia', ora: gia.ora }));
+                return;
+            }
             const oltre = teams.filter(t => st[t.id].points > st[t.id].members * 2);
             if (oltre.length && !confirm(`${oltre.map(t => t.name).join(', ')}: i punti superano il massimo (2 a testa per i membri presenti).\n\nInviare comunque?`)) return;
-            const gia = stud.classi.find(c => c.id === id);
-            if (gia && !confirm(`${etichettaClasse(id)} ha già inviato alle ${gia.ora}.\n\nVuoi sostituire i punteggi inviati?`)) return;
+            const riepilogo = teams.map(t => `${t.name}: ${st[t.id].members} membri, ${st[t.id].points} punti`).join('\n');
+            if (!confirm(`Inviare i punteggi di ${etichettaClasse(id)}?\n\n${riepilogo}\n\nL'invio è uno solo: dopo non si potranno più modificare.`)) return;
 
             const params = { action: 'classe', classe: id };
             teams.forEach(t => { params['m_' + t.id] = st[t.id].members; params['p_' + t.id] = st[t.id].points; });
@@ -1620,13 +1632,17 @@
             try {
                 const r = await chiamaServer(params);
                 if (!r.ok) throw r;
-                esito('stud-esito', 'ok', `Punteggi di ${etichettaClasse(id)} inviati alle ${esc(r.ora)}. Per correggerli, modifica i valori e invia di nuovo.`);
+                // invio riuscito: modulo pulito, pronto per un'altra classe
+                $('stud-classe').value = '';
+                stud.pannello.azzera();
                 try { sessionStorage.removeItem(CHIAVE_BOZZA); } catch (e) {}
-                await caricaGiornata('studenti');
+                esito('stud-esito', 'ok', `Punteggi di ${etichettaClasse(id)} inviati alle ${esc(r.ora)}: la classe è spuntata nell'elenco.`);
             } catch (e) {
                 esito('stud-esito', 'avviso', messaggioErrore(e));
             } finally {
                 btn.disabled = false;
+                await caricaGiornata('studenti');   // aggiorna spunte e classifica, e riblocca il pulsante se serve
+                aggiornaClasseScelta();
             }
         }
 
@@ -1678,16 +1694,17 @@
                         ${p.classi.map(([id, nome]) => {
                             const c = inviate.get(id);
                             const titolo = c ? `${etichettaClasse(id)}: inviata alle ${c.ora}` : `${etichettaClasse(id)}: non ancora inviata`;
-                            return `<button type="button" data-classe="${id}" title="${esc(titolo)}" aria-label="${esc(titolo)}" class="chip-classe${c ? ' inviata' : ''}${aperto ? ' cliccabile' : ''}">${c ? ICONA.spunta : ''}${nome}</button>`;
+                            return `<button type="button" data-classe="${id}" title="${esc(titolo)}" aria-label="${esc(titolo)}" class="chip-classe${c ? ' inviata' : ''}${aperto && !c ? ' cliccabile' : ''}">${c ? ICONA.spunta : ''}${nome}</button>`;
                         }).join('')}
                     </div>
                 </div>`).join('');
 
-            // nell'elenco a tendina le classi già inviate sono segnate
+            // nell'elenco a tendina le classi già inviate sono segnate e non si possono scegliere
             $('stud-classe').querySelectorAll('option[value]').forEach(o => {
                 if (!o.value) return;
                 const base = CLASSI[o.value].plesso === 'Infanzia' ? 'Sezione ' + CLASSI[o.value].nome : CLASSI[o.value].plesso + ' ' + CLASSI[o.value].nome;
-                o.textContent = inviate.has(o.value) ? `${base} · inviata` : base;
+                o.textContent = inviate.has(o.value) ? `${base} · già inviata` : base;
+                o.disabled = inviate.has(o.value);
             });
             aggiornaClasseScelta();
         }
