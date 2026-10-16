@@ -4,19 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Day</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Libreria per esportazione immagine ad alta risoluzione -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+        /* =========================================================
+           BASE: colori, ombre, reset degli elementi
+           ========================================================= */
+
+        :root {
+            /* blu istituzionale della scuola (progetti del portale sacrafamiglia) */
+            --scuola: #123E90;
+            --scuola-scuro: #0B2A66;
+            --scuola-chiaro: #E9EFFA;
+            --grigio-50: #f8fafc;
+            --grigio-100: #f1f5f9;
+            --grigio-200: #e2e8f0;
+            --grigio-300: #cbd5e1;
+            --grigio-400: #94a3b8;
+            --grigio-500: #64748b;
+            --grigio-600: #475569;
+            --grigio-700: #334155;
+            --grigio-800: #1e293b;
+            --grigio-900: #0f172a;
+            --ambra-300: #fcd34d;
+            --ombra-sm: 0 1px 2px 0 rgb(0 0 0 / .05);
+            --ombra-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);
+            --ombra-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);
+            --anello: 0 0 0 2px var(--scuola);      /* contorno di focus da tastiera */
+            --anello-campo: 0 0 0 2px #dbeafe;      /* contorno dei campi in modifica */
+        }
+
+        /* Colori delle quattro Case: la classe della Casa imposta le variabili, i componenti le usano */
+        .casa-blu    { --casa-sfondo: rgb(239 246 255 / .8); --casa-bordo: #bfdbfe; --casa-testo: #1e3a8a; --casa-badge: #dbeafe; --casa-badge-testo: #1e40af; --casa-pieno: #2563eb; --casa-pieno-testo: #fff; }
+        .casa-giallo { --casa-sfondo: rgb(255 251 235 / .8); --casa-bordo: #fde047; --casa-testo: #ca8a04; --casa-badge: #fef9c3; --casa-badge-testo: #854d0e; --casa-pieno: #fbbf24; --casa-pieno-testo: #451a03; }
+        .casa-rosso  { --casa-sfondo: rgb(255 241 242 / .8); --casa-bordo: #fecdd3; --casa-testo: #881337; --casa-badge: #ffe4e6; --casa-badge-testo: #9f1239; --casa-pieno: #e11d48; --casa-pieno-testo: #fff; }
+        .casa-verde  { --casa-sfondo: rgb(236 253 245 / .8); --casa-bordo: #a7f3d0; --casa-testo: #064e3b; --casa-badge: #d1fae5; --casa-badge-testo: #065f46; --casa-pieno: #059669; --casa-pieno-testo: #fff; }
+
+        *, ::before, ::after { box-sizing: border-box; border: 0 solid #e5e7eb; }
+        html {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            tab-size: 4;
+            -webkit-tap-highlight-color: transparent;
+        }
+        [hidden] { display: none !important; }
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f1f5f9;
+            color: var(--grigio-800);
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            line-height: inherit;
+            display: flex;
+            flex-direction: column;
             -webkit-font-smoothing: antialiased;
         }
+        h1, h2, h3, h4 { font-size: inherit; font-weight: inherit; }
+        h1, h2, h3, h4, p { margin: 0; }
+        a { color: inherit; text-decoration: inherit; }
+        b { font-weight: bolder; }
+        table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
+        button, input, optgroup, select {
+            font-family: inherit;
+            font-feature-settings: inherit;
+            font-variation-settings: inherit;
+            font-size: 100%;
+            font-weight: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            color: inherit;
+            margin: 0;
+            padding: 0;
+        }
+        button, select { text-transform: none; }
+        button { -webkit-appearance: button; background-color: transparent; background-image: none; cursor: pointer; }
+        :disabled { cursor: default; }
+        ul { list-style: none; margin: 0; padding: 0; }
+        input::placeholder { opacity: 1; color: #9ca3af; }
+        img, svg { display: block; vertical-align: middle; }
+        img { max-width: 100%; height: auto; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        main { flex-grow: 1; width: 100%; }
+
+        /* Pannello chiaro semitrasparente; .card-classifica, .pannello-casa ne ridefiniscono sfondo, bordo e ombra */
         .glass-panel {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(12px);
@@ -27,305 +107,1182 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        .banner-text-glow {
+
+        /* Transizioni: solo colori, oppure tutto (movimento e ombre comprese) */
+        .btn-menu, .riga-classifica, .spunta {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+            transition-duration: 150ms;
+        }
+        .scheda-menu, .btn-azione, .casa-btn, .contatore-btn, .contatore-input {
+            transition: all 150ms cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* =========================================================
+           TESTATA E BARRA DI NAVIGAZIONE
+           ========================================================= */
+
+        .testata {
+            flex-shrink: 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-bottom-left-radius: 1.5rem;
+            border-bottom-right-radius: 1.5rem;
+            box-shadow: var(--ombra-lg);
+            line-height: 1;
+            background-color: transparent;
+        }
+        .banner-img {
+            width: 100%;
+            border-bottom-left-radius: 1.5rem;
+            border-bottom-right-radius: 1.5rem;
+        }
+        .banner-titolo {
+            position: absolute;
+            bottom: .25rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 0 .5rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .banner-titolo h1 {
+            font-size: 1.25rem;
+            line-height: 1.25;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: .05em;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
         }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        /* Banner intero nel menu, striscia sottile nelle altre schermate */
+        body:not([data-vista="menu"]) .banner-img { height: 96px; object-fit: cover; object-position: center 22%; }
+        body:not([data-vista="menu"]) .banner-titolo { display: none; }
+
+        .barra {
+            width: 100%;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: .75rem .75rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 1rem;
+            row-gap: .5rem;
         }
-        input[type=number] {
-            -moz-appearance: textfield;
+        .btn-menu {
+            display: inline-flex;
+            align-items: center;
+            gap: .375rem;
+            padding: .5rem .75rem;
+            border-radius: .75rem;
+            background-color: #fff;
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            box-shadow: var(--ombra-sm);
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 700;
+            color: var(--scuola);
+        }
+        .btn-menu:hover { background-color: var(--scuola-chiaro); }
+        .btn-menu svg, .btn-azione svg { width: 1rem; height: 1rem; }
+        .barra-testi { flex: 1 1 0%; min-width: 0; }
+        .barra-titolo { font-size: 1.125rem; line-height: 1.25; font-weight: 800; color: var(--grigio-800); }
+        .barra-data { font-size: .75rem; line-height: 1rem; font-weight: 500; color: var(--grigio-500); }
+        .barra-data::first-letter { text-transform: uppercase; }
+        .barra-stato { width: 100%; }
+        .barra-stato:empty { display: none; }
+
+        /* =========================================================
+           MENU INIZIALE
+           ========================================================= */
+
+        .vista-menu { width: 100%; max-width: 72rem; margin: 0 auto; padding: 1rem; }
+        .menu-etichetta {
+            text-align: center;
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            color: var(--grigio-500);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: 1rem;
+        }
+        .menu-griglia { display: grid; gap: 1rem; }
+        .scheda-menu { border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; }
+        .scheda-menu:hover { transform: translateY(-.125rem); box-shadow: var(--ombra-lg); }
+        .menu-icona {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            background-color: var(--scuola-chiaro);
+            color: var(--scuola);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-icona.piena { background-color: var(--scuola); color: #fff; }
+        .menu-icona svg, .chiuso-icona svg { width: 1.75rem; height: 1.75rem; }
+        .menu-titolo { font-size: 1.25rem; line-height: 1.25; font-weight: 800; color: var(--grigio-800); }
+        .menu-sotto { color: var(--grigio-400); font-weight: 700; }
+        .menu-sotto-scuola { color: var(--scuola); }
+        .menu-desc { font-size: .875rem; line-height: 1.625; color: var(--grigio-500); flex: 1 1 0%; }
+        .menu-stato { align-self: flex-start; }
+
+        /* Etichetta di stato con pallino (menu e barra) */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .375rem;
+            padding: .25rem .625rem;
+            border-radius: 9999px;
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 700;
+        }
+        .pill-punto { width: .375rem; height: .375rem; border-radius: 9999px; background-color: currentColor; }
+        .pill-verde { background-color: #d1fae5; color: #065f46; }
+        .pill-ambra { background-color: #fef3c7; color: #92400e; }
+        .pill-blu { background-color: var(--scuola-chiaro); color: var(--scuola); }
+        .pill-grigio { background-color: var(--grigio-100); color: var(--grigio-600); }
+
+        /* =========================================================
+           SCHEDE DELLE CASE (membri e punti con - / +)
+           ========================================================= */
+
+        .griglia-case { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: .75rem; }
+        .griglia-case.sfida { flex: 1 1 0%; }
+        .pannello-casa {
+            padding: .875rem;
+            border-radius: 1rem;
+            border-width: 1px;
+            border-color: var(--casa-bordo);
+            background-color: var(--casa-sfondo);
+            box-shadow: var(--ombra-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: .75rem;
+        }
+        .pannello-nome {
+            font-size: 1.125rem;
+            line-height: 1.25;
+            font-weight: 800;
+            color: var(--casa-testo);
+            text-align: center;
+            letter-spacing: -.025em;
+        }
+        .pannello-righe { display: flex; flex-direction: column; gap: .625rem; width: 100%; }
+        .contatore {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgb(255 255 255 / .8);
+            padding: .5rem .75rem;
+            border-radius: .75rem;
+            border-width: 1px;
+            border-color: rgb(255 255 255 / .6);
+        }
+        .contatore-controlli { display: flex; align-items: center; gap: .375rem; }
+        .contatore-btn {
+            width: 2rem;
+            height: 2rem;
+            flex-shrink: 0;
+            border-radius: .75rem;
+            background-color: #fff;
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            box-shadow: var(--ombra-sm);
+            color: var(--grigio-700);
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contatore-btn:active { background-color: var(--grigio-100); transform: scale(.95); }
+        .contatore-input {
+            width: 4rem;
+            padding: .25rem 0;
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            font-weight: 700;
+            color: var(--grigio-800);
+            background-color: rgb(255 255 255 / .9);
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            border-radius: .5rem;
+        }
+        .contatore-input:focus { border-color: #60a5fa; outline: 2px solid transparent; outline-offset: 2px; box-shadow: var(--anello-campo); }
+
+        /* Etichetta piccola maiuscola (campi e contatori) */
+        .etichetta { font-size: .75rem; line-height: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--grigio-500); }
+
+        /* =========================================================
+           CARD DELLE CLASSIFICHE (Sfida, anteprima, classifiche di giornata)
+           ========================================================= */
+
+        .card-classifica {
+            border-radius: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border-width: 1px;
+            border-color: rgb(226 232 240 / .8);
+            background-color: #fff;
+            box-shadow: var(--ombra-md);
+        }
+        .card-classifica.alta { min-height: 380px; }
+        .card-testa {
+            background-image: linear-gradient(to right, var(--grigio-900), var(--grigio-800), var(--grigio-900));
+            color: #fff;
+            padding: .75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--ombra-sm);
+        }
+        .card-testa.scuola { background-image: linear-gradient(to right, var(--scuola-scuro), var(--scuola), var(--scuola-scuro)); gap: .5rem; }
+        .testa-gruppo { display: flex; flex-direction: column; line-height: 1.25; }
+        .testa-gruppo.a-destra { align-items: flex-end; }
+        .testa-sinistra { display: flex; align-items: center; gap: .375rem; flex-wrap: wrap; }
+        .testa-etichetta {
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 600;
+            color: var(--grigio-300);
+            text-transform: uppercase;
+            letter-spacing: .025em;
+        }
+        .card-testa.scuola .testa-etichetta { color: #dbeafe; }
+        .testa-sotto { font-size: 11px; font-weight: 500; color: #bfdbfe; }
+        .testa-data { font-size: 11px; font-weight: 500; color: var(--grigio-300); }
+        .card-testa.scuola .testa-data { color: #dbeafe; }
+        .testa-valore { font-size: .75rem; line-height: 1rem; font-weight: 800; color: var(--ambra-300); }
+        .testa-valore.a-destra { text-align: right; }
+
+        /* Campo libero "Classe" nella card della Sfida */
+        .campo-classe {
+            display: inline-flex;
+            align-items: center;
+            background-color: rgb(51 65 85 / .8);
+            border-width: 1px;
+            border-color: var(--grigio-600);
+            border-radius: .5rem;
+            padding: .125rem .5rem;
+        }
+        .campo-classe label { margin-right: .25rem; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--grigio-400); }
+        .campo-classe input {
+            width: 5rem;
+            background-color: transparent;
+            color: var(--ambra-300);
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 800;
+            letter-spacing: .025em;
+        }
+        .campo-classe input:focus { outline: 2px solid transparent; outline-offset: 2px; }
+
+        .card-corpo { padding: .75rem; }
+        .card-corpo.cresce { flex-grow: 1; }
+        .card-corpo.scorre { overflow-x: auto; }
+        .card-piede {
+            background-color: var(--grigio-50);
+            border-top-width: 1px;
+            border-color: var(--grigio-100);
+            padding: .5rem 1rem;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--grigio-400);
+        }
+
+        .tabella { width: 100%; min-width: 280px; text-align: left; border-collapse: collapse; }
+        .tabella.senza-minimo { min-width: auto; }
+        .tabella thead tr {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--grigio-400);
+            border-bottom-width: 1px;
+            border-color: rgb(226 232 240 / .8);
+        }
+        .tabella th { font-weight: 700; padding-bottom: .5rem; }
+        .tabella .col-pos { text-align: center; width: 3rem; }
+        .tabella .col-nome { padding-left: .75rem; }
+        .tabella .col-valore { text-align: right; padding-right: .75rem; }
+        /* righe separate da una linea sottile (tabelle ed elenco dei docenti) */
+        .righe-divise > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; border-color: var(--grigio-100); }
+
+        .riga-classifica:hover { background-color: rgb(248 250 252 / .8); }
+        .cella-pos { text-align: center; padding-top: .875rem; padding-bottom: .875rem; }
+        .cella-casa {
+            padding-left: .75rem;
+            padding-top: .875rem;
+            padding-bottom: .875rem;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 800;
+            color: var(--casa-testo);
+        }
+        .cella-valore { text-align: right; padding-right: .75rem; padding-top: .875rem; padding-bottom: .875rem; }
+        .nome-riga { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+        .dettaglio { margin-top: .125rem; font-size: 11px; font-weight: 500; color: var(--grigio-400); }
+
+        /* Classifica di giornata degli studenti: righe un po' più basse e punti grandi */
+        .giornata .cella-pos, .giornata .cella-valore { padding-top: .75rem; padding-bottom: .75rem; }
+        .cella-giornata { padding-left: .75rem; padding-top: .75rem; padding-bottom: .75rem; }
+        .nome-giornata {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 800;
+            color: var(--casa-testo);
+        }
+        .giornata .dettaglio { margin-top: 0; }
+        .punti-giornata { font-size: 1.5rem; line-height: 2rem; font-weight: 900; color: var(--grigio-800); font-variant-numeric: tabular-nums; }
+
+        /* Posizione in classifica: medaglia oro / argento / bronzo */
+        .pos {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 9999px;
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 700;
+        }
+        .pos-vuota { background-color: var(--grigio-100); color: var(--grigio-400); }
+        .pos-1 {
+            background-image: linear-gradient(to bottom right, var(--ambra-300), #eab308);
+            color: #422006;
+            box-shadow: 0 0 0 1px #fde047, var(--ombra-sm);
+        }
+        .pos-2 { background-image: linear-gradient(to bottom right, var(--grigio-200), var(--grigio-300)); color: var(--grigio-700); }
+        .pos-3 { background-image: linear-gradient(to bottom right, #fef3c7, #fed7aa); color: #78350f; }
+        .pos-altra { background-color: #fff; border-width: 1px; border-color: var(--grigio-200); color: var(--grigio-500); }
+
+        /* +4 / +3 / +2 / +1 accanto al nome della Casa */
+        .punti-casa {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--grigio-800);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: .125rem .5rem;
+            border-radius: 9999px;
+        }
+        .trofeo { width: 1rem; height: 1rem; flex-shrink: 0; color: #f59e0b; }
+
+        /* Efficienza in percentuale, nel colore della Casa */
+        .efficienza {
+            display: inline-block;
+            padding: .25rem .625rem;
+            border-radius: .5rem;
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            letter-spacing: .025em;
+            background-color: var(--casa-badge);
+            color: var(--casa-badge-testo);
+        }
+        .efficienza.vuota { background-color: var(--grigio-100); color: var(--grigio-400); }
+
+        /* Pulsanti a tutta larghezza sotto le card */
+        .btn-azione {
+            width: 100%;
+            padding: .625rem 1rem;
+            border-radius: 1rem;
+            box-shadow: var(--ombra-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-azione:active { transform: scale(.98); }
+        .btn-scuro { background-color: var(--grigio-900); color: #fff; }
+        .btn-scuro:hover { background-color: var(--grigio-800); }
+        .btn-scuro svg { color: #fbbf24; }
+        .btn-invia { padding-top: .75rem; padding-bottom: .75rem; background-color: var(--scuola); color: #fff; }
+        .btn-invia:hover { background-color: var(--scuola-scuro); }
+        .btn-invia:disabled { opacity: .6; cursor: wait; }
+        .btn-invia svg { color: var(--ambra-300); }
+        .btn-chiaro { background-color: #fff; color: var(--scuola); border-width: 1px; border-color: var(--grigio-200); }
+        .btn-chiaro:hover { background-color: var(--scuola-chiaro); }
+
+        /* =========================================================
+           SFIDA TRA CASE
+           ========================================================= */
+
+        .sfida-layout { width: 100%; max-width: 80rem; margin: 0 auto; padding: .75rem; display: flex; flex-direction: column; gap: 1rem; }
+        .colonna { display: flex; flex-direction: column; gap: .5rem; }
+        .colonna.estesa { flex: 1 1 0%; }
+
+        /* =========================================================
+           HOUSE DAY (studenti e docenti)
+           ========================================================= */
+
+        .vista-hd { width: 100%; max-width: 1680px; margin: 0 auto; padding: .75rem; }
+        .avvisi { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+        .avvisi:empty { display: none; }
+        .hd-griglia { display: grid; gap: 1.25rem; align-items: flex-start; }
+        .riquadro { border-radius: 1rem; padding: .875rem; }
+        .stud-form { display: flex; flex-direction: column; gap: .75rem; }
+        .scelta-classe { display: flex; flex-wrap: wrap; align-items: center; column-gap: .75rem; row-gap: .5rem; }
+        .campo {
+            background-color: #fff;
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            border-radius: .75rem;
+            padding: .625rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            font-weight: 600;
+            color: var(--grigio-800);
+        }
+        .campo:focus { border-color: var(--scuola); outline: 2px solid transparent; outline-offset: 2px; box-shadow: var(--anello-campo); }
+        .campo.elenco { flex: 1 1 0%; min-width: 200px; padding-top: .5rem; padding-bottom: .5rem; font-weight: 700; }
+        .nota-classe { width: 100%; }
+        .nota-classe:empty { display: none; }
+        .aiuto { font-size: .75rem; line-height: 1.625; color: var(--grigio-500); padding: 0 .25rem; }
+        .aiuto b { color: var(--grigio-700); }
+        .aggiornamento { font-size: 11px; color: var(--grigio-400); padding: 0 .25rem; }
+        .lista-testa { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+        .lista-titolo { font-size: .875rem; line-height: 1.25rem; font-weight: 800; color: var(--grigio-700); }
+        .lista-conteggio { font-size: .875rem; line-height: 1.25rem; font-weight: 800; color: var(--scuola); font-variant-numeric: tabular-nums; }
+        .vuoto { padding-top: 2.5rem; padding-bottom: 2.5rem; text-align: center; font-size: .875rem; line-height: 1.25rem; color: var(--grigio-400); }
+        .vuoto.basso { padding-top: 2rem; padding-bottom: 2rem; }
+
+        /* Classi che hanno inviato */
+        .checklist { display: flex; flex-direction: column; gap: .75rem; margin-top: .75rem; }
+        .plesso-titolo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--grigio-400); margin-bottom: .375rem; }
+        .plesso-classi { display: flex; flex-wrap: wrap; gap: .375rem; }
+        .chip-classe {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            padding: .25rem .625rem;
+            border-radius: .5rem;
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            background-color: #fff;
+            color: var(--grigio-500);
+            font-size: .75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            cursor: default;
+        }
+        .chip-classe.inviata { background-color: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+        .chip-classe.cliccabile { cursor: pointer; }
+        .chip-classe.cliccabile:hover { border-color: var(--scuola); }
+        .chip-classe svg { width: .875rem; height: .875rem; flex-shrink: 0; }
+
+        /* Modulo dei docenti */
+        .doc-form { border-radius: 1.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        .doc-titolo { font-size: 1rem; line-height: 1.5rem; font-weight: 800; color: var(--grigio-800); }
+        .campo-gruppo { display: flex; flex-direction: column; gap: .375rem; }
+        .scelta-case { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+        .casa-btn {
+            padding: .75rem;
+            border-radius: .75rem;
+            border-width: 2px;
+            border-color: var(--casa-bordo);
+            background-color: var(--casa-sfondo);
+            color: var(--casa-testo);
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 800;
+        }
+        .casa-btn.scelta {
+            border-color: var(--casa-pieno);
+            background-color: var(--casa-pieno);
+            color: var(--casa-pieno-testo);
+            box-shadow: var(--ombra-md);
+            transform: scale(1.02);
+        }
+        .spunta {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .75rem;
+            border-radius: .75rem;
+            border-width: 1px;
+            border-color: var(--grigio-200);
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .spunta:has(:checked) { background-color: #ecfdf5; border-color: #6ee7b7; }
+        .spunta input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: #059669; }
+        .spunta-testo { flex: 1 1 0%; font-size: .875rem; line-height: 1.25rem; font-weight: 600; color: var(--grigio-700); }
+        .spunta-punti { font-size: .75rem; line-height: 1rem; font-weight: 800; padding: .125rem .5rem; border-radius: 9999px; background-color: var(--grigio-800); color: #fff; }
+
+        /* Docenti che hanno partecipato */
+        .elenco-docenti { margin-top: .5rem; }
+        .docente { display: flex; align-items: center; gap: .625rem; padding-top: .5rem; padding-bottom: .5rem; }
+        .punto-casa { width: .625rem; height: .625rem; flex-shrink: 0; border-radius: 9999px; background-color: var(--casa-pieno, var(--grigio-300)); }
+        .docente-nome {
+            flex: 1 1 0%;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 600;
+            color: var(--grigio-700);
+        }
+        .tag { font-size: 10px; font-weight: 700; padding: .125rem .375rem; border-radius: .25rem; background-color: var(--grigio-100); color: var(--grigio-400); }
+        .tag.si { background-color: #d1fae5; color: #065f46; }
+
+        /* Riquadri di avviso: verde = fatto, ambra = attenzione, blu = informazione (mai rosso) */
+        .box {
+            display: flex;
+            align-items: flex-start;
+            gap: .5rem;
+            padding: .625rem .75rem;
+            border-radius: .75rem;
+            border-width: 1px;
+            font-size: .875rem;
+            line-height: 1.375;
+            font-weight: 500;
+        }
+        .box svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+        .box-ok { background-color: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+        .box-avviso { background-color: #fffbeb; border-color: #fde68a; color: #92400e; }
+        .box-info { background-color: var(--scuola-chiaro); border-color: #bfdbfe; color: var(--scuola); }
+
+        /* Inserimento chiuso: data del prossimo House Day */
+        .chiuso { max-width: 36rem; margin: 1rem auto 0; border-radius: 1.5rem; padding: 1.5rem; text-align: center; }
+        .chiuso-icona {
+            margin: 0 auto;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 1rem;
+            background-color: var(--scuola-chiaro);
+            color: var(--scuola);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chiuso-titolo { margin-top: 1rem; font-size: .875rem; line-height: 1.25rem; font-weight: 700; color: var(--grigio-500); text-transform: uppercase; letter-spacing: .05em; }
+        .chiuso-data { margin-top: .25rem; font-size: 1.5rem; line-height: 2rem; font-weight: 800; color: var(--scuola); }
+        .chiuso-data::first-letter { text-transform: uppercase; }
+        .chiuso-testo { margin-top: .75rem; font-size: .875rem; line-height: 1.625; color: var(--grigio-600); }
+        .chiuso-conto {
+            margin-top: .75rem;
+            display: inline-block;
+            padding: .25rem .75rem;
+            border-radius: 9999px;
+            background-color: #fef3c7;
+            color: #92400e;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           FOCUS DA TASTIERA (anello blu, sopra l'ombra già presente)
+           ========================================================= */
+
+        .btn-menu:focus-visible, .scheda-menu:focus-visible, .casa-btn:focus-visible { outline: 2px solid transparent; outline-offset: 2px; }
+        .btn-menu:focus-visible { box-shadow: var(--anello), var(--ombra-sm); }
+        .scheda-menu:focus-visible, .casa-btn:focus-visible { box-shadow: var(--anello); }
+        .scheda-menu:hover:focus-visible { box-shadow: var(--anello), var(--ombra-lg); }
+        .casa-btn.scelta:focus-visible { box-shadow: var(--anello), var(--ombra-md); }
+
+        /* =========================================================
+           SCHERMI PIÙ LARGHI
+           ========================================================= */
+
+        @media (min-width: 640px) {
+            .banner-titolo { bottom: .75rem; }
+            .banner-titolo h1 { font-size: 1.875rem; line-height: 2.25rem; }
+            .barra { padding: 1rem 1rem 0; }
+            .barra-titolo { font-size: 1.25rem; line-height: 1.75rem; }
+            .barra-data { font-size: .875rem; line-height: 1.25rem; }
+            .barra-stato { width: auto; }
+            .vista-menu { padding: 1.5rem; }
+            .menu-etichetta { font-size: .875rem; line-height: 1.25rem; }
+            .griglia-case { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .griglia-case.sfida { gap: 1rem; }
+            .pannello-casa { padding: 1rem; }
+            .pannello-nome { font-size: 1.25rem; line-height: 1.75rem; }
+            .contatore-controlli { gap: .5rem; }
+            .contatore-btn { width: 2.5rem; height: 2.5rem; }
+            .contatore-input { width: 5rem; font-size: 1.25rem; line-height: 1.75rem; }
+            .card-testa { padding-left: 1rem; padding-right: 1rem; }
+            .testa-sinistra { gap: .5rem; }
+            .testa-etichetta { font-size: .875rem; line-height: 1.25rem; }
+            .testa-data { font-size: .75rem; line-height: 1rem; }
+            .testa-valore { font-size: .875rem; line-height: 1.25rem; }
+            .campo-classe input { width: 7rem; font-size: .875rem; line-height: 1.25rem; }
+            .card-corpo { padding: 1rem; }
+            .tabella thead tr { font-size: .75rem; line-height: 1rem; }
+            .cella-casa, .nome-giornata { font-size: 1rem; line-height: 1.5rem; }
+            .pos { width: 2rem; height: 2rem; font-size: .875rem; line-height: 1.25rem; }
+            .punti-casa { font-size: .75rem; line-height: 1rem; }
+            .trofeo { width: 1.25rem; height: 1.25rem; }
+            .efficienza { padding-left: .75rem; padding-right: .75rem; font-size: .875rem; line-height: 1.25rem; }
+            .sfida-layout { padding: 1rem; gap: 1.5rem; }
+            .vista-hd { padding: 1rem; }
+            .riquadro { padding: 1rem; }
+            .doc-form { padding: 1.25rem; }
+            .casa-btn { font-size: 1rem; line-height: 1.5rem; }
+            .chiuso { margin-top: 2rem; padding: 2rem; }
+            .chiuso-data { font-size: 1.875rem; line-height: 2.25rem; }
+        }
+        @media (min-width: 768px) {
+            .banner-titolo h1 { font-size: 3rem; line-height: 1; }
+            .barra { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .menu-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .sfida-layout { padding: 1.5rem; }
+            .vista-hd { padding: 1.5rem; }
+        }
+
+        /* Classifica di giornata degli studenti: posizione sempre grande (anche sotto i 640 px) */
+        .pos.fissa { width: 2rem; height: 2rem; font-size: .875rem; line-height: 1.25rem; }
+
+        /* House Day: tre colonne mentre si inseriscono i punteggi, due a inserimento chiuso */
+        .hd-griglia.concluso .area-form,
+        .hd-griglia.concluso .area-anteprima { display: none; }
+        @media (min-width: 1024px) {
+            .sfida-layout { flex-direction: row; }
+            .hd-griglia {
+                grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+                grid-template-areas: "form anteprima giornata" "form anteprima lista";
+                grid-template-rows: auto 1fr;
+            }
+            #doc-aperto.hd-griglia {
+                grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, .9fr);
+                grid-template-areas: "form giornata lista";
+                grid-template-rows: auto;
+            }
+            .hd-griglia.concluso,
+            #doc-aperto.hd-griglia.concluso {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                grid-template-areas: "giornata lista";
+                grid-template-rows: auto;
+                max-width: 72rem;
+                margin-inline: auto;
+            }
+            .area-form { grid-area: form; }
+            .area-anteprima { grid-area: anteprima; }
+            .area-giornata { grid-area: giornata; }
+            .area-lista { grid-area: lista; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; animation: none !important; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col text-slate-800">
+<body data-vista="menu">
 
     <!-- TOP BAR / BANNER COMPLETO -->
-    <header class="shrink-0 w-full relative overflow-hidden rounded-b-3xl shadow-lg leading-none bg-transparent">
-        <img 
-            src="banner.jpg" 
-            alt="Mascotte Case" 
-            class="w-full h-auto block rounded-b-3xl"
+    <header class="testata">
+        <img
+            src="banner.jpg"
+            alt="Le mascotte delle quattro Case"
+            class="banner-img"
         >
-        <div class="absolute bottom-1 sm:bottom-3 inset-x-0 text-center px-2 pointer-events-none z-10">
-            <h1 class="text-xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-wider banner-text-glow leading-tight">
+        <div class="banner-titolo">
+            <h1>
                 House Day
             </h1>
         </div>
     </header>
 
-    <!-- CONTENUTO PRINCIPALE -->
-    <main class="flex-grow w-full max-w-7xl mx-auto p-3 sm:p-4 md:p-6 flex flex-col lg:flex-row gap-4 sm:gap-6">
-        
-        <!-- SEZIONE INPUT SQUADRE -->
-        <section class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4" id="team-inputs" aria-label="Controllo Punti Squadre">
-            <!-- Schede generate da JavaScript -->
+    <!-- BARRA DI NAVIGAZIONE (tutte le schermate tranne il menu) -->
+    <nav id="barra" hidden class="barra">
+        <a href="#menu" class="btn-menu">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Menu
+        </a>
+        <div class="barra-testi">
+            <h2 id="barra-titolo" class="barra-titolo"></h2>
+            <p id="barra-data" class="barra-data"></p>
+        </div>
+        <div id="barra-stato" class="barra-stato"></div>
+    </nav>
+
+    <main>
+
+        <!-- ============ MENU INIZIALE ============ -->
+        <section id="vista-menu" data-schermata class="vista-menu">
+            <p class="menu-etichetta">Scegli l'attività</p>
+            <div class="menu-griglia">
+                <a href="#sfida" class="glass-panel scheda-menu">
+                    <span class="menu-icona">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3.5h10V9a5 5 0 0 1-10 0V3.5zM7 5.5H4.5V7a3 3 0 0 0 3 3M17 5.5h2.5V7a3 3 0 0 1-3 3M12 14v3.5M8 20.5h8l-.8-3H8.8z" /></svg>
+                    </span>
+                    <h3 class="menu-titolo">Sfida tra Case <span class="menu-sotto">· Tornei</span></h3>
+                    <p class="menu-desc">Inserisci membri e punti delle quattro Case, guarda la classifica e scarica la card.</p>
+                    <span class="pill pill-grigio menu-stato"><span class="pill-punto"></span>Sempre disponibile</span>
+                </a>
+                <a href="#studenti" class="glass-panel scheda-menu">
+                    <span class="menu-icona piena">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </span>
+                    <h3 class="menu-titolo">House Day <span class="menu-sotto-scuola">· Studenti</span></h3>
+                    <p class="menu-desc">In ogni classe: colori della Casa e merenda di frutta, per tutte e quattro le Case.</p>
+                    <span id="menu-stato-studenti" class="menu-stato"></span>
+                </a>
+                <a href="#docenti" class="glass-panel scheda-menu">
+                    <span class="menu-icona piena">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </span>
+                    <h3 class="menu-titolo">House Day <span class="menu-sotto-scuola">· Docenti</span></h3>
+                    <p class="menu-desc">Ogni docente registra la sua Casa, i colori indossati e il frutto portato.</p>
+                    <span id="menu-stato-docenti" class="menu-stato"></span>
+                </a>
+            </div>
         </section>
 
-        <!-- SEZIONE CLASSIFICA DA ESPORTARE -->
-        <div class="flex-1 flex flex-col gap-2">
-            
-            <!-- CARD CLASSIFICA EFFETTIVA -->
-            <section id="leaderboard-card" class="glass-panel rounded-3xl overflow-hidden flex flex-col border border-slate-200/80 shadow-md min-h-[380px] bg-white">
-                <!-- Barra del titolo con Campo Classe libero -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-3 sm:px-4 flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        <span class="text-xs sm:text-sm font-semibold text-slate-300 uppercase tracking-wide">Classifica</span>
-                        <!-- Input classe libero -->
-                        <div class="inline-flex items-center bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-0.5">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Classe:</span>
-                            <input 
-                                type="text" 
-                                id="class-name-input" 
-                                value="" 
-                                placeholder=""
-                                class="bg-transparent text-amber-300 font-extrabold text-xs sm:text-sm focus:outline-none w-20 sm:w-28 tracking-wide"
-                            >
+        <!-- ============ SFIDA TRA CASE / TORNEI (funzionamento invariato) ============ -->
+        <section id="vista-sfida" data-schermata hidden>
+            <div class="sfida-layout">
+
+                <!-- SEZIONE INPUT SQUADRE -->
+                <section class="griglia-case sfida" id="team-inputs" aria-label="Controllo Punti Squadre">
+                    <!-- Schede generate da JavaScript -->
+                </section>
+
+                <!-- SEZIONE CLASSIFICA DA ESPORTARE -->
+                <div class="colonna estesa">
+
+                    <!-- CARD CLASSIFICA EFFETTIVA -->
+                    <section id="leaderboard-card" class="glass-panel card-classifica alta">
+                        <!-- Barra del titolo con Campo Classe libero -->
+                        <div class="card-testa">
+                            <div class="testa-sinistra">
+                                <span class="testa-etichetta">Classifica</span>
+                                <!-- Input classe libero -->
+                                <div class="campo-classe">
+                                    <label for="class-name-input">Classe:</label>
+                                    <input
+                                        type="text"
+                                        id="class-name-input"
+                                        value=""
+                                        placeholder=""
+                                    >
+                                </div>
+                            </div>
+                            <span id="sfida-data" class="testa-data"></span>
                         </div>
+
+                        <div class="card-corpo cresce scorre">
+                            <table class="tabella">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pos">Pos</th>
+                                        <th class="col-nome">Squadra</th>
+                                        <th class="col-valore">Efficienza</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-body" class="righe-divise">
+                                    <!-- Righe generate da JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer visivo nella card per l'esportazione -->
+                        <div class="card-piede">
+                            House Day • Scuola Sacra Famiglia
+                        </div>
+                    </section>
+
+                    <!-- PULSANTE DOWNLOAD DIRETTO IN LOCALE -->
+                    <button
+                        id="btn-export"
+                        onclick="exportLeaderboardImage()"
+                        class="btn-azione btn-scuro"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span>Scarica Card Classifica (PNG)</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ HOUSE DAY STUDENTI ============ -->
+        <section id="vista-studenti" data-schermata hidden class="vista-hd">
+            <div id="stud-avvisi" class="avvisi"></div>
+            <div id="stud-chiuso" hidden></div>
+            <div id="stud-aperto" hidden class="hd-griglia">
+
+                <!-- 1. classe e punteggi -->
+                <div class="area-form stud-form">
+                    <div class="glass-panel riquadro scelta-classe">
+                        <label for="stud-classe" class="etichetta">Classe</label>
+                        <select id="stud-classe" class="campo elenco"></select>
+                        <p id="stud-nota-classe" class="nota-classe"></p>
                     </div>
-                    <span class="text-[11px] sm:text-xs text-slate-300 font-medium">14/10/2026</span>
-                </div>
-                
-                <div class="p-3 sm:p-4 flex-grow overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[280px]">
-                        <thead>
-                            <tr class="text-[11px] sm:text-xs uppercase tracking-wider text-slate-400 border-b border-slate-200/80 pb-2">
-                                <th class="font-bold text-center w-12 pb-2">Pos</th>
-                                <th class="font-bold pl-3 pb-2">Squadra</th>
-                                <th class="font-bold text-right pr-3 pb-2">Efficienza</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body" class="divide-y divide-slate-100">
-                            <!-- Righe generate da JavaScript -->
-                        </tbody>
-                    </table>
+                    <div id="stud-inputs" class="griglia-case" aria-label="Membri e punti delle Case"></div>
+                    <p class="aiuto">
+                        <b>1 punto</b> per ogni studente con maglia o felpa della sua Casa,
+                        <b>1 punto</b> per ogni merenda a base di frutta: al massimo 2 punti a testa.
+                    </p>
                 </div>
 
-                <!-- Footer visivo nella card per l'esportazione -->
-                <div class="bg-slate-50 border-t border-slate-100 px-4 py-2 text-center text-[10px] text-slate-400 font-medium">
-                    House Day • Scuola Sacra Famiglia
+                <!-- 2. anteprima della classe e invio -->
+                <div class="area-anteprima colonna">
+                    <section class="glass-panel card-classifica">
+                        <div class="card-testa scuola">
+                            <span class="testa-etichetta">Anteprima classe</span>
+                            <span id="stud-anteprima-classe" class="testa-valore a-destra"></span>
+                        </div>
+                        <div class="card-corpo scorre">
+                            <table class="tabella">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pos">Pos</th>
+                                        <th class="col-nome">Squadra</th>
+                                        <th class="col-valore">Efficienza</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stud-anteprima-body" class="righe-divise"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <button id="stud-invia" type="button" class="btn-azione btn-invia">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6" /></svg>
+                        <span id="stud-invia-testo">Invia i punteggi della classe</span>
+                    </button>
+                    <div id="stud-esito"></div>
                 </div>
-            </section>
 
-            <!-- PULSANTE DOWNLOAD DIRETTO IN LOCALE -->
-            <button 
-                id="btn-export"
-                onclick="exportLeaderboardImage()"
-                class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm cursor-pointer"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                <span>Scarica Card Classifica (PNG)</span>
-            </button>
-        </div>
-        
+                <!-- 3. classifica di giornata -->
+                <div class="area-giornata colonna">
+                    <section id="stud-giornata-card" class="glass-panel card-classifica">
+                        <div class="card-testa scuola">
+                            <div class="testa-gruppo">
+                                <span class="testa-etichetta">Classifica di giornata</span>
+                                <span class="testa-sotto">House Day Studenti</span>
+                            </div>
+                            <div class="testa-gruppo a-destra">
+                                <span id="stud-giornata-data" class="testa-data"></span>
+                                <span id="stud-giornata-classi" class="testa-valore"></span>
+                            </div>
+                        </div>
+                        <div id="stud-giornata-body" class="card-corpo"></div>
+                        <div class="card-piede">
+                            House Day • Scuola Sacra Famiglia
+                        </div>
+                    </section>
+                    <p id="stud-agg" class="aggiornamento"></p>
+                    <button id="stud-export" type="button" class="btn-azione btn-chiaro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>Scarica classifica di giornata (PNG)</span>
+                    </button>
+                </div>
+
+                <!-- 4. classi che hanno già inviato -->
+                <section class="area-lista glass-panel riquadro">
+                    <div class="lista-testa">
+                        <h3 class="lista-titolo">Classi che hanno inviato</h3>
+                        <span id="stud-conteggio" class="lista-conteggio"></span>
+                    </div>
+                    <div id="stud-checklist" class="checklist"></div>
+                </section>
+            </div>
+        </section>
+
+        <!-- ============ HOUSE DAY DOCENTI ============ -->
+        <section id="vista-docenti" data-schermata hidden class="vista-hd">
+            <div id="doc-avvisi" class="avvisi"></div>
+            <div id="doc-chiuso" hidden></div>
+            <div id="doc-aperto" hidden class="hd-griglia">
+
+                <!-- 1. registrazione del docente -->
+                <section class="area-form glass-panel doc-form">
+                    <h3 class="doc-titolo">La tua partecipazione</h3>
+                    <div class="campo-gruppo">
+                        <label for="doc-nome" class="etichetta">Nome e cognome</label>
+                        <input id="doc-nome" type="text" maxlength="40" autocomplete="name" class="campo">
+                    </div>
+                    <div class="campo-gruppo">
+                        <span id="doc-casa-etichetta" class="etichetta">La tua Casa</span>
+                        <div id="doc-case" class="scelta-case" role="group" aria-labelledby="doc-casa-etichetta"></div>
+                    </div>
+                    <div class="colonna">
+                        <label class="spunta">
+                            <input id="doc-colori" type="checkbox">
+                            <span class="spunta-testo">Indosso i colori della mia Casa</span>
+                            <span class="spunta-punti">+1</span>
+                        </label>
+                        <label class="spunta">
+                            <input id="doc-frutta" type="checkbox">
+                            <span class="spunta-testo">Ho portato un frutto</span>
+                            <span class="spunta-punti">+1</span>
+                        </label>
+                    </div>
+                    <button id="doc-invia" type="button" class="btn-azione btn-invia">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6" /></svg>
+                        <span>Registra la partecipazione</span>
+                    </button>
+                    <div id="doc-esito"></div>
+                </section>
+
+                <!-- 2. classifica docenti di giornata -->
+                <div class="area-giornata colonna">
+                    <section id="doc-giornata-card" class="glass-panel card-classifica">
+                        <div class="card-testa scuola">
+                            <div class="testa-gruppo">
+                                <span class="testa-etichetta">Classifica di giornata</span>
+                                <span class="testa-sotto">House Day Docenti</span>
+                            </div>
+                            <div class="testa-gruppo a-destra">
+                                <span id="doc-giornata-data" class="testa-data"></span>
+                                <span id="doc-giornata-totale" class="testa-valore"></span>
+                            </div>
+                        </div>
+                        <div class="card-corpo scorre">
+                            <table class="tabella">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pos">Pos</th>
+                                        <th class="col-nome">Casa</th>
+                                        <th class="col-valore">Efficienza</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="doc-giornata-body" class="righe-divise"></tbody>
+                            </table>
+                        </div>
+                        <div class="card-piede">
+                            House Day • Scuola Sacra Famiglia
+                        </div>
+                    </section>
+                    <p id="doc-agg" class="aggiornamento"></p>
+                    <button id="doc-export" type="button" class="btn-azione btn-chiaro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>Scarica classifica di giornata (PNG)</span>
+                    </button>
+                </div>
+
+                <!-- 3. docenti registrati -->
+                <section class="area-lista glass-panel riquadro">
+                    <div class="lista-testa">
+                        <h3 class="lista-titolo">Docenti che hanno partecipato</h3>
+                        <span id="doc-conteggio" class="lista-conteggio"></span>
+                    </div>
+                    <ul id="doc-elenco" class="elenco-docenti righe-divise"></ul>
+                </section>
+            </div>
+        </section>
     </main>
 
     <script>
+        /* =========================================================
+           CONFIGURAZIONE
+           ========================================================= */
+
+        /* URL dell'App web Apps Script, quello che finisce con /exec (istruzioni in houseday.gs).
+           Vuoto = modalità locale: i punteggi restano solo in questo browser, utile per provare. */
+        const URL_HOUSEDAY = '';
+
+        /* House Day: ogni venerdì dell'anno scolastico 2026/27, dalle 8:00 alle 11:00 (ora italiana).
+           Calendario regionale Lombardia: lezioni di primaria e secondaria fino all'8 giugno 2027,
+           vacanze di Natale 23/12/2026-5/1/2027, vacanze di Pasqua 25-30/3/2027.
+           In "esclusi" vanno anche gli eventuali ponti o chiusure decisi dalla scuola. */
+        const CALENDARIO = {
+            fine: '2027-06-04',
+            esclusi: ['2026-12-25', '2027-01-01', '2027-03-26'],
+            apertura: 8 * 60,
+            chiusura: 11 * 60
+        };
+
+        // stesse classi di CLASSI in houseday.gs
+        const PLESSI = [
+            { nome: 'Infanzia', classi: [['I-GIALLA', 'Gialla'], ['I-ROSSA', 'Rossa'], ['I-AZZURRA', 'Azzurra']] },
+            { nome: 'Primaria', classi: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B'].map(c => ['P-' + c, c]) },
+            { nome: 'Secondaria', classi: ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].map(c => ['S-' + c, c]) }
+        ];
+        const CLASSI = {};
+        PLESSI.forEach(p => p.classi.forEach(([id, nome]) => CLASSI[id] = { id, nome, plesso: p.nome }));
+        const TOTALE_CLASSI = Object.keys(CLASSI).length;
+
+        // index.html?prova: sempre aperto, e con il foglio Google i dati vanno nei fogli "Prova …"
+        const PROVA = new URLSearchParams(location.search).has('prova');
+
+        /* =========================================================
+           CASE E CALCOLO PER CLASSE (conteggio invariato)
+           ========================================================= */
+
         const teams = [
             { id: 'aquilablu', name: 'AquilaBlu', color: 'blue' },
             { id: 'cerogiallo', name: 'CeroGiallo', color: 'yellow' },
             { id: 'tassorosso', name: 'TassoRosso', color: 'red' },
             { id: 'querciaverde', name: 'QuerciaVerde', color: 'green' }
         ];
+        const teamById = id => teams.find(t => t.id === id);
 
-        const colors = {
-            blue: { bg: 'bg-blue-50/80', border: 'border-blue-200', text: 'text-blue-900', badge: 'bg-blue-100 text-blue-800' },
-            yellow: { bg: 'bg-amber-50/80', border: 'border-yellow-300', text: 'text-yellow-600', badge: 'bg-yellow-100 text-yellow-800' },
-            red: { bg: 'bg-rose-50/80', border: 'border-rose-200', text: 'text-rose-900', badge: 'bg-rose-100 text-rose-800' },
-            green: { bg: 'bg-emerald-50/80', border: 'border-emerald-200', text: 'text-emerald-900', badge: 'bg-emerald-100 text-emerald-800' }
-        };
+        // classe CSS con i colori di ogni Casa (variabili --casa-* nel <style>)
+        const colors = { blue: 'casa-blu', yellow: 'casa-giallo', red: 'casa-rosso', green: 'casa-verde' };
 
-        const state = {
-            aquilablu: { members: 0, points: 0 },
-            cerogiallo: { members: 0, points: 0 },
-            tassorosso: { members: 0, points: 0 },
-            querciaverde: { members: 0, points: 0 }
-        };
-
-        const inputsContainer = document.getElementById('team-inputs');
-        const leaderboardBody = document.getElementById('leaderboard-body');
-
-        teams.forEach(team => {
-            const c = colors[team.color];
-            const card = document.createElement('div');
-            card.className = `glass-panel p-3.5 sm:p-4 rounded-2xl border ${c.border} ${c.bg} flex flex-col justify-between shadow-sm gap-3`;
-            card.innerHTML = `
-                <h3 class="text-lg sm:text-xl font-extrabold ${c.text} text-center tracking-tight leading-tight">${team.name}</h3>
-                
-                <div class="flex flex-col gap-2.5 w-full">
-                    <!-- Riga Membri -->
-                    <div class="flex items-center justify-between bg-white/80 px-3 py-2 rounded-xl border border-white/60 shadow-xs">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Membri</span>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'members', -1)">-</button>
-                            <input 
-                                type="number" 
-                                id="members-${team.id}-val" 
-                                value="0" 
-                                min="0" 
-                                class="w-16 sm:w-20 text-center font-bold text-base sm:text-xl text-slate-800 bg-white/90 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none rounded-lg py-1 transition-all"
-                                oninput="onDirectInput('${team.id}', 'members', this.value)"
-                                onfocus="this.select()"
-                            >
-                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'members', 1)">+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Riga Punti -->
-                    <div class="flex items-center justify-between bg-white/80 px-3 py-2 rounded-xl border border-white/60 shadow-xs">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Punti</span>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'points', -1)">-</button>
-                            <input 
-                                type="number" 
-                                id="points-${team.id}-val" 
-                                value="0" 
-                                min="0" 
-                                class="w-16 sm:w-20 text-center font-bold text-base sm:text-xl text-slate-800 bg-white/90 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none rounded-lg py-1 transition-all"
-                                oninput="onDirectInput('${team.id}', 'points', this.value)"
-                                onfocus="this.select()"
-                            >
-                            <button class="no-select w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 text-xl font-bold active:bg-slate-100 active:scale-95 flex items-center justify-center transition-all shrink-0" onclick="updateVal('${team.id}', 'points', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            inputsContainer.appendChild(card);
-        });
-
-        function updateVal(teamId, type, delta) {
-            let current = state[teamId][type];
-            let newVal = current + delta;
-            if (newVal < 0) newVal = 0;
-            state[teamId][type] = newVal;
-            document.getElementById(`${type}-${teamId}-val`).value = newVal;
-            calculate();
-        }
-
-        function onDirectInput(teamId, type, value) {
-            let parsedVal = parseInt(value, 10);
-            if (isNaN(parsedVal) || parsedVal < 0) parsedVal = 0;
-            state[teamId][type] = parsedVal;
-            calculate();
-        }
-
-        function calculate() {
-            let results = [];
-            
-            teams.forEach(team => {
+        /* Efficienza = punti / (membri × 2). Ordine per efficienza, a parità per punti;
+           posizione e punti Casa (+4/+3/+2/+1) condivisi solo se efficienza E punti coincidono.
+           Identico a calcolaClasse_ in houseday.gs. */
+        function calcolaClasse(state) {
+            const results = teams.map(team => {
                 const members = state[team.id].members;
                 const points = state[team.id].points;
-                
-                let efficiency = 0;
-                let maxPoints = members * 2;
-
-                if (members > 0) {
-                    efficiency = (points / maxPoints) * 100;
-                }
-
-                results.push({
-                    team: team,
-                    members: members,
-                    points: points,
-                    maxPoints: maxPoints,
-                    efficiency: efficiency,
-                    hasData: (members > 0 || points > 0)
-                });
+                const maxPoints = members * 2;
+                const efficiency = members > 0 ? (points / maxPoints) * 100 : 0;
+                return { team, members, points, maxPoints, efficiency, hasData: (members > 0 || points > 0) };
             });
-
             results.sort((a, b) => b.efficiency - a.efficiency || b.points - a.points);
-            leaderboardBody.innerHTML = '';
-            
             results.forEach((res, index) => {
-                if (index > 0) {
-                    const prev = results[index - 1];
-                    if (res.efficiency === prev.efficiency && res.points === prev.points) {
-                        res.actualRank = prev.actualRank;
-                        res.rankPts = prev.rankPts;
-                    } else {
-                        res.actualRank = index + 1;
-                        res.rankPts = 4 - index;
-                    }
+                const prev = results[index - 1];
+                if (prev && res.efficiency === prev.efficiency && res.points === prev.points) {
+                    res.actualRank = prev.actualRank;
+                    res.rankPts = prev.rankPts;
                 } else {
-                    res.actualRank = 1;
-                    res.rankPts = 4;
+                    res.actualRank = index + 1;
+                    res.rankPts = 4 - index;
                 }
+            });
+            return results;
+        }
 
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+        const ICONA = {
+            trofeo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="trofeo" role="img" aria-label="Primo posto"><path fill="currentColor" d="M7 3.5h10V9a5 5 0 0 1-10 0V3.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 5.5H4.5V7a3 3 0 0 0 3 3M17 5.5h2.5V7a3 3 0 0 1-3 3"/><path fill="currentColor" d="M11 13.5h2V17h-2z"/><rect fill="currentColor" x="7.5" y="17" width="9" height="3.5" rx="1"/></svg>',
+            spunta: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0z" clip-rule="evenodd"/></svg>',
+            lucchetto: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
+            ok: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            avviso: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+            info: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        };
+
+        function classeBadge(rank, hasData) {
+            if (!hasData) return 'pos-vuota';
+            if (rank === 1) return 'pos-1';
+            if (rank === 2) return 'pos-2';
+            if (rank === 3) return 'pos-3';
+            return 'pos-altra';
+        }
+
+        /* Righe della classifica di una classe (stessa grafica in Sfida, anteprima e docenti).
+           opzioni.badge: mostra +4/+3/+2/+1; opzioni.dettaglio: riga piccola sotto il nome. */
+        function renderClassifica(tbody, results, opzioni = {}) {
+            const { badge = true, dettaglio = null } = opzioni;
+            tbody.innerHTML = results.map(res => {
                 const c = colors[res.team.color];
-                const tr = document.createElement('tr');
-                tr.className = `transition-colors hover:bg-slate-50/80`;
-                
-                let posBadge = 'bg-slate-100 text-slate-400';
-                let posTrophy = '';
-                
-                if (res.hasData) {
-                    if (res.actualRank === 1) {
-                        posBadge = 'bg-gradient-to-br from-amber-300 to-yellow-500 text-yellow-950 font-black shadow-sm ring-1 ring-yellow-300';
-                        posTrophy = '🏆';
-                    } else if (res.actualRank === 2) {
-                        posBadge = 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-700 shadow-xs';
-                    } else if (res.actualRank === 3) {
-                        posBadge = 'bg-gradient-to-br from-amber-100 to-orange-200 text-amber-900 shadow-xs';
-                    } else {
-                        posBadge = 'bg-white border border-slate-200 text-slate-500 shadow-xs';
-                    }
-                }
-
-                tr.innerHTML = `
-                    <td class="text-center py-3.5">
-                        <span class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full font-bold text-xs sm:text-sm ${posBadge}">
+                return `
+                <tr class="riga-classifica ${c}">
+                    <td class="cella-pos">
+                        <span class="pos ${classeBadge(res.actualRank, res.hasData)}">
                             ${res.hasData ? res.actualRank : '-'}
                         </span>
                     </td>
-                    <td class="font-extrabold text-sm sm:text-base ${c.text} pl-3 py-3.5">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span>${res.team.name}</span> 
-                            ${res.hasData ? `<span class="inline-flex items-center justify-center bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-xs">+${res.rankPts}</span>` : ''}
-                            ${res.actualRank === 1 && res.hasData ? `<span class="text-base">${posTrophy}</span>` : ''}
+                    <td class="cella-casa">
+                        <div class="nome-riga">
+                            <span>${res.team.name}</span>
+                            ${res.hasData && badge ? `<span class="punti-casa">+${res.rankPts}</span>` : ''}
+                            ${res.actualRank === 1 && res.hasData ? ICONA.trofeo : ''}
                         </div>
+                        ${dettaglio ? `<div class="dettaglio">${dettaglio(res)}</div>` : ''}
                     </td>
-                    <td class="text-right pr-3 py-3.5">
-                        <span class="inline-block px-2.5 sm:px-3 py-1 rounded-lg font-bold text-xs sm:text-sm tracking-wide ${res.hasData ? c.badge : 'bg-slate-100 text-slate-400'}">
+                    <td class="cella-valore">
+                        <span class="efficienza${res.hasData ? '' : ' vuota'}">
                             ${res.hasData ? res.efficiency.toFixed(1) + '%' : '-'}
                         </span>
                     </td>
-                `;
-                leaderboardBody.appendChild(tr);
+                </tr>`;
+            }).join('');
+        }
+
+        /* Schede di inserimento delle quattro Case (membri e punti con - / +).
+           Usate dalla Sfida tra Case e dall'House Day studenti, ciascuna con il proprio stato. */
+        function creaPannello({ contenitore, tbody, prefisso, onChange }) {
+            const state = {};
+            teams.forEach(t => state[t.id] = { members: 0, points: 0 });
+            const pulsante = 'no-select contatore-btn';
+            contenitore.innerHTML = teams.map(team => {
+                const c = colors[team.color];
+                const riga = (campo, etichetta) => `
+                    <div class="contatore">
+                        <span class="etichetta">${etichetta}</span>
+                        <div class="contatore-controlli">
+                            <button type="button" class="${pulsante}" data-team="${team.id}" data-campo="${campo}" data-delta="-1" aria-label="${etichetta} ${team.name}: togli 1">-</button>
+                            <input
+                                type="number"
+                                inputmode="numeric"
+                                id="${prefisso}-${campo}-${team.id}"
+                                value="0"
+                                min="0"
+                                data-team="${team.id}" data-campo="${campo}"
+                                aria-label="${etichetta} ${team.name}"
+                                class="contatore-input"
+                            >
+                            <button type="button" class="${pulsante}" data-team="${team.id}" data-campo="${campo}" data-delta="1" aria-label="${etichetta} ${team.name}: aggiungi 1">+</button>
+                        </div>
+                    </div>`;
+                return `
+                <div class="glass-panel pannello-casa ${c}">
+                    <h3 class="pannello-nome">${team.name}</h3>
+                    <div class="pannello-righe">${riga('members', 'Membri')}${riga('points', 'Punti')}</div>
+                </div>`;
+            }).join('');
+
+            function aggiorna() {
+                const results = calcolaClasse(state);
+                renderClassifica(tbody, results);
+                if (onChange) onChange(results);
+            }
+            function imposta(teamId, campo, valore) {
+                state[teamId][campo] = Math.max(0, valore);
+                $(`${prefisso}-${campo}-${teamId}`).value = state[teamId][campo];
+                aggiorna();
+            }
+            contenitore.addEventListener('click', e => {
+                const b = e.target.closest('button[data-delta]');
+                if (b) imposta(b.dataset.team, b.dataset.campo, state[b.dataset.team][b.dataset.campo] + Number(b.dataset.delta));
             });
+            contenitore.addEventListener('input', e => {
+                const i = e.target.closest('input[data-team]');
+                if (!i) return;
+                let v = parseInt(i.value, 10);
+                if (isNaN(v) || v < 0) v = 0;
+                state[i.dataset.team][i.dataset.campo] = v;
+                aggiorna();
+            });
+            contenitore.addEventListener('focusin', e => { if (e.target.matches('input[data-team]')) e.target.select(); });
+            aggiorna();
+            return { state, imposta, azzera() { teams.forEach(t => { imposta(t.id, 'members', 0); imposta(t.id, 'points', 0); }); } };
         }
 
         // Download diretto del file PNG in locale
-        async function exportLeaderboardImage() {
-            const card = document.getElementById('leaderboard-card');
-            const classVal = document.getElementById('class-name-input').value.trim();
-            const classSuffix = classVal ? `_${classVal.replace(/[^a-zA-Z0-9_-]/g, '_')}` : '';
-            const fileName = `Classifica_HouseDay${classSuffix}_14-10-2026.png`;
-
-            const btn = document.getElementById('btn-export');
+        async function esportaPNG(card, fileName, btn) {
             const originalBtnContent = btn.innerHTML;
             btn.innerHTML = `<span>Download in corso...</span>`;
             btn.disabled = true;
-
             try {
-                const canvas = await html2canvas(card, {
-                    scale: 2,
-                    backgroundColor: '#ffffff',
-                    useCORS: true
-                });
-
-                // Creazione del link ed esecuzione immediata del download in locale
-                const imageURI = canvas.toDataURL('image/png');
+                const canvas = await html2canvas(card, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
                 const downloadLink = document.createElement('a');
                 downloadLink.download = fileName;
-                downloadLink.href = imageURI;
+                downloadLink.href = canvas.toDataURL('image/png');
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
-
             } catch (error) {
                 console.error("Errore salvataggio PNG:", error);
                 alert("Si è verificato un errore durante la generazione dell'immagine.");
@@ -335,7 +1292,558 @@
             }
         }
 
-        calculate();
+        /* =========================================================
+           DATE E ORARI (sempre ora italiana, qualunque sia il fuso del dispositivo)
+           ========================================================= */
+
+        function adessoRoma(d = new Date()) {
+            const p = {};
+            new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+                .formatToParts(d).forEach(x => p[x.type] = x.value);
+            return { iso: `${p.year}-${p.month}-${p.day}`, min: Number(p.hour) * 60 + Number(p.minute) };
+        }
+        const giornoSettimana = iso => new Date(iso + 'T12:00:00Z').getUTCDay();   // 5 = venerdì
+        function aggiungiGiorni(iso, n) {
+            const d = new Date(iso + 'T12:00:00Z');
+            d.setUTCDate(d.getUTCDate() + n);
+            return d.toISOString().slice(0, 10);
+        }
+        const dataLunga = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+        const dataBreve = iso => iso.split('-').reverse().join('/');
+        const oraTesto = min => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
+        const durata = min => min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`;
+        const oraAttuale = () => new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
+
+        /* I venerdì di House Day da oggi alla fine dell'anno scolastico, vacanze escluse.
+           Se ne mostra solo il primo: il venerdì corrente (oggi, se è venerdì) o il prossimo. */
+        function venerdiHouseDay(daIso) {
+            const lista = [];
+            for (let d = aggiungiGiorni(daIso, (5 - giornoSettimana(daIso) + 7) % 7); d <= CALENDARIO.fine; d = aggiungiGiorni(d, 7)) {
+                if (!CALENDARIO.esclusi.includes(d)) lista.push(d);
+            }
+            return lista;
+        }
+
+        /* fase: aperto (venerdì 8-11) · presto (venerdì prima delle 8) · concluso (venerdì dopo le 11)
+                 chiuso (non è un venerdì di House Day) · finito (anno scolastico terminato) */
+        function statoHouseDay() {
+            const ora = adessoRoma();
+            if (PROVA) return { fase: 'aperto', data: ora.iso, restano: null };
+            const data = venerdiHouseDay(ora.iso)[0];
+            if (!data) return { fase: 'finito' };
+            if (data !== ora.iso) return { fase: 'chiuso', data };
+            if (ora.min < CALENDARIO.apertura) return { fase: 'presto', data, mancano: CALENDARIO.apertura - ora.min };
+            if (ora.min < CALENDARIO.chiusura) return { fase: 'aperto', data, restano: CALENDARIO.chiusura - ora.min };
+            return { fase: 'concluso', data };
+        }
+
+        function pill(colore, testo) {
+            // colore: verde, ambra, blu, grigio
+            return `<span class="pill pill-${colore}"><span class="pill-punto"></span>${testo}</span>`;
+        }
+        function pillStato(s) {
+            if (PROVA) return pill('ambra', 'Modalità prova · sempre aperto');
+            const fascia = `${oraTesto(CALENDARIO.apertura)}–${oraTesto(CALENDARIO.chiusura)}`;
+            switch (s.fase) {
+                case 'aperto': return pill('verde', `Aperto ora · chiude alle ${oraTesto(CALENDARIO.chiusura)}${s.restano <= 30 ? ` (mancano ${s.restano} min)` : ''}`);
+                case 'presto': return pill('ambra', `Oggi · apre alle ${oraTesto(CALENDARIO.apertura)}`);
+                case 'concluso': return pill('blu', 'Concluso · classifica di oggi');
+                case 'chiuso': {
+                    const giorno = dataLunga(s.data).replace(/ \d{4}$/, '');
+                    return pill('grigio', `${giorno.charAt(0).toUpperCase() + giorno.slice(1)} · ${fascia}`);
+                }
+                default: return pill('grigio', 'Anno scolastico concluso');
+            }
+        }
+
+        function htmlChiuso(s, tipo) {
+            const titolo = s.fase === 'finito' ? 'Non ci sono altri House Day in calendario'
+                : s.fase === 'presto' ? "L'House Day di oggi apre alle " + oraTesto(CALENDARIO.apertura)
+                : 'Il prossimo House Day è';
+            return `
+            <div class="glass-panel chiuso">
+                <div class="chiuso-icona">${ICONA.lucchetto}</div>
+                <p class="chiuso-titolo">${titolo}</p>
+                ${s.data ? `<p class="chiuso-data">${dataLunga(s.data)}</p>` : ''}
+                <p class="chiuso-testo">
+                    L'inserimento ${tipo === 'docenti' ? 'delle partecipazioni dei docenti' : 'dei punteggi delle classi'} è aperto solo il venerdì,
+                    dalle ${oraTesto(CALENDARIO.apertura)} alle ${oraTesto(CALENDARIO.chiusura)}.
+                </p>
+                ${s.fase === 'presto' ? `<p class="chiuso-conto">Mancano ${durata(s.mancano)}</p>` : ''}
+            </div>`;
+        }
+
+        function box(tipo, testo) {
+            // tipo: ok (verde), avviso (ambra), info (blu)
+            return `<div role="status" class="box box-${tipo}">${ICONA[tipo]}<span>${testo}</span></div>`;
+        }
+        const esito = (id, tipo, testo) => $(id).innerHTML = testo ? box(tipo, testo) : '';
+
+        function avvisiHouseDay(s) {
+            const a = [];
+            if (PROVA) a.push(box('avviso', `<b>Modalità prova</b>: nessun limite d'orario.${URL_HOUSEDAY ? ' I dati vanno nei fogli «Prova» e non contano per la classifica vera.' : ''}`));
+            if (!URL_HOUSEDAY) a.push(box('info', '<b>Modalità locale</b>: i punteggi restano solo su questo computer. Per raccoglierli da tutte le classi va collegato il foglio Google (istruzioni nel README).'));
+            if (s.fase === 'concluso') a.push(box('info', `L'inserimento si è chiuso alle ${oraTesto(CALENDARIO.chiusura)}: questa è la classifica finale di oggi.`));
+            return a.join('');
+        }
+
+        /* =========================================================
+           COLLEGAMENTO AL FOGLIO GOOGLE (o archivio locale)
+           ========================================================= */
+
+        const chiaveNome = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+        async function chiamaServer(params) {
+            if (!URL_HOUSEDAY) return serverLocale(params);
+            const q = new URLSearchParams({ ...params, ...(PROVA ? { prova: '1' } : {}) });
+            const r = await fetch(URL_HOUSEDAY + '?' + q, { cache: 'no-store' });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }
+
+        /* Modalità locale (URL_HOUSEDAY vuoto): stesso protocollo di houseday.gs, dati in localStorage.
+           Il controllo d'orario qui lo fa solo la pagina. */
+        const CHIAVE_LOCALE = 'houseday_locale';
+        function serverLocale(p) {
+            let db;
+            try { db = JSON.parse(localStorage.getItem(CHIAVE_LOCALE)) || {}; } catch (e) { db = {}; }
+            db.studenti = db.studenti || [];
+            db.docenti = db.docenti || [];
+            const oggi = adessoRoma().iso, ora = oraAttuale();
+            const salva = () => { try { localStorage.setItem(CHIAVE_LOCALE, JSON.stringify(db)); } catch (e) {} };
+            if (p.action === 'giornata') {
+                return p.tipo === 'docenti'
+                    ? { ok: true, docenti: db.docenti.filter(r => r.data === p.data) }
+                    : { ok: true, classi: db.studenti.filter(r => r.data === p.data) };
+            }
+            if (p.action === 'classe') {
+                const riga = { data: oggi, ora, id: p.classe, case: {} };
+                teams.forEach(t => riga.case[t.id] = { m: Number(p['m_' + t.id]) || 0, p: Number(p['p_' + t.id]) || 0 });
+                db.studenti = db.studenti.filter(r => !(r.data === oggi && r.id === p.classe)).concat(riga);
+                salva();
+                return { ok: true, ora };
+            }
+            if (p.action === 'docente') {
+                const k = chiaveNome(p.nome);
+                db.docenti = db.docenti.filter(r => !(r.data === oggi && chiaveNome(r.nome) === k))
+                    .concat({ data: oggi, ora, nome: p.nome, casa: p.casa, colori: Number(p.colori) || 0, frutta: Number(p.frutta) || 0 });
+                salva();
+                return { ok: true, ora };
+            }
+            return { ok: false, errore: 'azione' };
+        }
+
+        function messaggioErrore(e) {
+            const errore = e && e.errore;
+            if (errore === 'chiuso') return `L'inserimento è chiuso: si può inviare solo il venerdì dalle ${oraTesto(CALENDARIO.apertura)} alle ${oraTesto(CALENDARIO.chiusura)}.`;
+            if (errore === 'classe') return 'Classe non riconosciuta: sceglila di nuovo dall\'elenco.';
+            if (errore === 'vuoto') return 'Inserisci i membri e i punti di almeno una Casa.';
+            if (errore === 'nome') return 'Scrivi il tuo nome e cognome.';
+            if (errore === 'casa') return 'Scegli la tua Casa.';
+            return 'Invio non riuscito: controlla la connessione e riprova. I dati inseriti sono ancora qui.';
+        }
+
+        /* Ogni classe che ha inviato assegna +4/+3/+2/+1 alle Case presenti; la giornata li somma.
+           A parità di totale le Case condividono la posizione. */
+        function aggregaStudenti(classi) {
+            const tot = {};
+            teams.forEach(t => tot[t.id] = { team: t, punti: 0, classi: 0 });
+            classi.forEach(cl => {
+                const state = {};
+                teams.forEach(t => state[t.id] = { members: (cl.case[t.id] || {}).m || 0, points: (cl.case[t.id] || {}).p || 0 });
+                calcolaClasse(state).forEach(r => {
+                    if (!r.hasData) return;
+                    tot[r.team.id].punti += r.rankPts;
+                    tot[r.team.id].classi++;
+                });
+            });
+            const righe = Object.values(tot).sort((a, b) => b.punti - a.punti);
+            righe.forEach((r, i) => r.pos = i > 0 && r.punti === righe[i - 1].punti ? righe[i - 1].pos : i + 1);
+            return righe;
+        }
+
+        /* Docenti: per ogni Casa membri = docenti registrati, punti = colori + frutta (massimo 2 a testa).
+           Stesso calcolo delle classi: efficienza, poi punti. */
+        function aggregaDocenti(docenti) {
+            const state = {};
+            teams.forEach(t => state[t.id] = { members: 0, points: 0 });
+            docenti.forEach(d => {
+                if (!state[d.casa]) return;
+                state[d.casa].members++;
+                state[d.casa].points += (d.colori ? 1 : 0) + (d.frutta ? 1 : 0);
+            });
+            return calcolaClasse(state);
+        }
+
+        /* =========================================================
+           HOUSE DAY: aggiornamento della classifica di giornata
+           ========================================================= */
+
+        let timerGiornata = null;
+        let faseMostrata = null;
+
+        function fermaAggiornamento() {
+            clearInterval(timerGiornata);
+            timerGiornata = null;
+        }
+        function avviaAggiornamento(tipo) {
+            fermaAggiornamento();
+            caricaGiornata(tipo);
+            timerGiornata = setInterval(() => caricaGiornata(tipo), 30000);
+        }
+
+        async function caricaGiornata(tipo) {
+            const s = statoHouseDay();
+            if (s.fase !== 'aperto' && s.fase !== 'concluso') return;
+            const pre = tipo === 'studenti' ? 'stud' : 'doc';
+            try {
+                const r = await chiamaServer({ action: 'giornata', tipo, data: s.data });
+                if (!r.ok) throw r;
+                if (tipo === 'studenti') {
+                    stud.classi = r.classi || [];
+                    renderGiornataStudenti();
+                } else {
+                    doc.docenti = r.docenti || [];
+                    renderGiornataDocenti();
+                }
+                $(pre + '-agg').textContent = 'Aggiornata alle ' + oraAttuale() + ' · si aggiorna da sola ogni 30 secondi';
+            } catch (e) {
+                $(pre + '-agg').textContent = 'Classifica non raggiungibile in questo momento: nuovo tentativo tra 30 secondi.';
+            }
+        }
+
+        function mostraHouseDay(tipo) {
+            const s = statoHouseDay();
+            const pre = tipo === 'studenti' ? 'stud' : 'doc';
+            faseMostrata = s.fase;
+            $('barra-data').textContent = s.data ? dataLunga(s.data) : '';
+            $('barra-stato').innerHTML = pillStato(s);
+            $(pre + '-avvisi').innerHTML = avvisiHouseDay(s);
+            const visibile = s.fase === 'aperto' || s.fase === 'concluso';
+            $(pre + '-chiuso').hidden = visibile;
+            $(pre + '-aperto').hidden = !visibile;
+            if (!visibile) {
+                $(pre + '-chiuso').innerHTML = htmlChiuso(s, tipo);
+                fermaAggiornamento();
+                return;
+            }
+            $(pre + '-aperto').classList.toggle('concluso', s.fase === 'concluso');
+            $(pre + '-giornata-data').textContent = dataBreve(s.data);
+            if (tipo === 'studenti') { renderGiornataStudenti(); aggiornaClasseScelta(); }
+            else renderGiornataDocenti();
+            avviaAggiornamento(tipo);
+        }
+
+        /* =========================================================
+           HOUSE DAY STUDENTI
+           ========================================================= */
+
+        const stud = { pannello: null, classi: [] };
+        const CHIAVE_BOZZA = 'houseday_bozza_studenti';
+        const etichettaClasse = id => !CLASSI[id] ? id
+            : CLASSI[id].plesso === 'Infanzia' ? `Infanzia · Sezione ${CLASSI[id].nome}` : `${CLASSI[id].plesso} · ${CLASSI[id].nome}`;
+
+        function initStudenti() {
+            $('stud-classe').innerHTML = '<option value="">Scegli la classe…</option>' + PLESSI.map(p =>
+                `<optgroup label="${p.nome}">${p.classi.map(([id, nome]) =>
+                    `<option value="${id}">${p.nome === 'Infanzia' ? 'Sezione ' + nome : p.nome + ' ' + nome}</option>`).join('')}</optgroup>`).join('');
+
+            // la bozza si legge prima di creare le schede, che al primo disegno la sovrascrivono
+            let bozza = null;
+            try { bozza = JSON.parse(sessionStorage.getItem(CHIAVE_BOZZA)); } catch (e) {}
+
+            stud.pannello = creaPannello({ contenitore: $('stud-inputs'), tbody: $('stud-anteprima-body'), prefisso: 'stud', onChange: salvaBozza });
+
+            if (bozza && bozza.data === statoHouseDay().data) {
+                if (CLASSI[bozza.classe]) $('stud-classe').value = bozza.classe;
+                teams.forEach(t => {
+                    const v = bozza.state && bozza.state[t.id];
+                    if (!v) return;
+                    stud.pannello.imposta(t.id, 'members', Number(v.members) || 0);
+                    stud.pannello.imposta(t.id, 'points', Number(v.points) || 0);
+                });
+            }
+
+            $('stud-classe').addEventListener('change', () => { aggiornaClasseScelta(); salvaBozza(); esito('stud-esito', '', ''); });
+            $('stud-invia').addEventListener('click', inviaClasse);
+            $('stud-export').addEventListener('click', () =>
+                esportaPNG($('stud-giornata-card'), `HouseDay_Studenti_${dataBreve(statoHouseDay().data || adessoRoma().iso).replace(/\//g, '-')}.png`, $('stud-export')));
+            $('stud-checklist').addEventListener('click', e => {
+                const b = e.target.closest('button[data-classe]');
+                if (!b || statoHouseDay().fase !== 'aperto') return;
+                $('stud-classe').value = b.dataset.classe;
+                aggiornaClasseScelta();
+                salvaBozza();
+                $('stud-classe').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+            aggiornaClasseScelta();
+        }
+
+        // la bozza sopravvive a un ricaricamento accidentale della pagina (stessa scheda del browser)
+        function salvaBozza() {
+            if (!stud.pannello) return;
+            try { sessionStorage.setItem(CHIAVE_BOZZA, JSON.stringify({ data: statoHouseDay().data, classe: $('stud-classe').value, state: stud.pannello.state })); } catch (e) {}
+        }
+
+        function aggiornaClasseScelta() {
+            const id = $('stud-classe').value;
+            $('stud-anteprima-classe').textContent = id ? etichettaClasse(id) : 'scegli la classe';
+            $('stud-invia-testo').textContent = id ? `Invia i punteggi · ${etichettaClasse(id)}` : 'Invia i punteggi della classe';
+            const gia = stud.classi.find(c => c.id === id);
+            $('stud-nota-classe').innerHTML = gia
+                ? box('info', `Questa classe ha già inviato alle ${esc(gia.ora)}. Se invii di nuovo, i nuovi punteggi sostituiscono quelli di prima.`)
+                : '';
+        }
+
+        async function inviaClasse() {
+            const id = $('stud-classe').value;
+            const st = stud.pannello.state;
+            if (!id) {
+                esito('stud-esito', 'avviso', 'Scegli prima la classe.');
+                $('stud-classe').focus();
+                return;
+            }
+            if (!teams.some(t => st[t.id].members > 0 || st[t.id].points > 0)) {
+                esito('stud-esito', 'avviso', 'Inserisci i membri e i punti di almeno una Casa.');
+                return;
+            }
+            const oltre = teams.filter(t => st[t.id].points > st[t.id].members * 2);
+            if (oltre.length && !confirm(`${oltre.map(t => t.name).join(', ')}: i punti superano il massimo (2 a testa per i membri presenti).\n\nInviare comunque?`)) return;
+            const gia = stud.classi.find(c => c.id === id);
+            if (gia && !confirm(`${etichettaClasse(id)} ha già inviato alle ${gia.ora}.\n\nVuoi sostituire i punteggi inviati?`)) return;
+
+            const params = { action: 'classe', classe: id };
+            teams.forEach(t => { params['m_' + t.id] = st[t.id].members; params['p_' + t.id] = st[t.id].points; });
+            const btn = $('stud-invia');
+            btn.disabled = true;
+            esito('stud-esito', 'info', 'Invio in corso…');
+            try {
+                const r = await chiamaServer(params);
+                if (!r.ok) throw r;
+                esito('stud-esito', 'ok', `Punteggi di ${etichettaClasse(id)} inviati alle ${esc(r.ora)}. Per correggerli, modifica i valori e invia di nuovo.`);
+                try { sessionStorage.removeItem(CHIAVE_BOZZA); } catch (e) {}
+                await caricaGiornata('studenti');
+            } catch (e) {
+                esito('stud-esito', 'avviso', messaggioErrore(e));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function renderGiornataStudenti() {
+            const inviate = new Map(stud.classi.map(c => [c.id, c]));
+            $('stud-giornata-classi').textContent = `${inviate.size}/${TOTALE_CLASSI} classi`;
+            $('stud-conteggio').textContent = `${inviate.size}/${TOTALE_CLASSI}`;
+
+            if (!stud.classi.length) {
+                $('stud-giornata-body').innerHTML = '<p class="vuoto">Ancora nessuna classe ha inviato i punteggi.</p>';
+            } else {
+                $('stud-giornata-body').innerHTML = `
+                <table class="tabella senza-minimo giornata">
+                    <thead>
+                        <tr>
+                            <th class="col-pos">Pos</th>
+                            <th class="col-nome">Casa</th>
+                            <th class="col-valore">Punti</th>
+                        </tr>
+                    </thead>
+                    <tbody class="righe-divise">
+                        ${aggregaStudenti(stud.classi).map(r => {
+                            const c = colors[r.team.color], conDati = r.classi > 0;
+                            return `
+                            <tr class="${c}">
+                                <td class="cella-pos">
+                                    <span class="pos fissa ${classeBadge(r.pos, conDati)}">${conDati ? r.pos : '-'}</span>
+                                </td>
+                                <td class="cella-giornata">
+                                    <div class="nome-giornata">
+                                        <span>${r.team.name}</span>${r.pos === 1 && conDati ? ICONA.trofeo : ''}
+                                    </div>
+                                    <div class="dettaglio">${r.classi} ${r.classi === 1 ? 'classe' : 'classi'}</div>
+                                </td>
+                                <td class="cella-valore">
+                                    <span class="punti-giornata">${r.punti}</span>
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>`;
+            }
+
+            const aperto = statoHouseDay().fase === 'aperto';
+            $('stud-checklist').innerHTML = PLESSI.map(p => `
+                <div>
+                    <h4 class="plesso-titolo">${p.nome}</h4>
+                    <div class="plesso-classi">
+                        ${p.classi.map(([id, nome]) => {
+                            const c = inviate.get(id);
+                            const titolo = c ? `${etichettaClasse(id)}: inviata alle ${c.ora}` : `${etichettaClasse(id)}: non ancora inviata`;
+                            return `<button type="button" data-classe="${id}" title="${esc(titolo)}" aria-label="${esc(titolo)}" class="chip-classe${c ? ' inviata' : ''}${aperto ? ' cliccabile' : ''}">${c ? ICONA.spunta : ''}${nome}</button>`;
+                        }).join('')}
+                    </div>
+                </div>`).join('');
+
+            // nell'elenco a tendina le classi già inviate sono segnate
+            $('stud-classe').querySelectorAll('option[value]').forEach(o => {
+                if (!o.value) return;
+                const base = CLASSI[o.value].plesso === 'Infanzia' ? 'Sezione ' + CLASSI[o.value].nome : CLASSI[o.value].plesso + ' ' + CLASSI[o.value].nome;
+                o.textContent = inviate.has(o.value) ? `${base} · inviata` : base;
+            });
+            aggiornaClasseScelta();
+        }
+
+        /* =========================================================
+           HOUSE DAY DOCENTI
+           ========================================================= */
+
+        const doc = { casa: '', docenti: [] };
+
+        function initDocenti() {
+            $('doc-case').innerHTML = teams.map(t => {
+                const c = colors[t.color];
+                return `<button type="button" data-casa="${t.id}" aria-pressed="false" class="casa-btn ${c}">${t.name}</button>`;
+            }).join('');
+            $('doc-case').addEventListener('click', e => {
+                const b = e.target.closest('button[data-casa]');
+                if (b) scegliCasaDocente(b.dataset.casa);
+            });
+            $('doc-invia').addEventListener('click', inviaDocente);
+            $('doc-export').addEventListener('click', () =>
+                esportaPNG($('doc-giornata-card'), `HouseDay_Docenti_${dataBreve(statoHouseDay().data || adessoRoma().iso).replace(/\//g, '-')}.png`, $('doc-export')));
+        }
+
+        function scegliCasaDocente(id) {
+            doc.casa = id;
+            $('doc-case').querySelectorAll('button[data-casa]').forEach(b => {
+                const scelta = b.dataset.casa === id;
+                b.setAttribute('aria-pressed', scelta);
+                b.classList.toggle('scelta', scelta);
+            });
+        }
+
+        async function inviaDocente() {
+            const nome = $('doc-nome').value.replace(/\s+/g, ' ').trim();
+            if (nome.length < 3) {
+                esito('doc-esito', 'avviso', 'Scrivi il tuo nome e cognome.');
+                $('doc-nome').focus();
+                return;
+            }
+            if (!doc.casa) {
+                esito('doc-esito', 'avviso', 'Scegli la tua Casa.');
+                return;
+            }
+            const gia = doc.docenti.find(d => chiaveNome(d.nome) === chiaveNome(nome));
+            if (gia && !confirm(`${gia.nome} risulta già registrato alle ${gia.ora} (${teamById(gia.casa) ? teamById(gia.casa).name : ''}).\n\nVuoi sostituire la registrazione?`)) return;
+
+            const colori = $('doc-colori').checked ? 1 : 0, frutta = $('doc-frutta').checked ? 1 : 0;
+            const btn = $('doc-invia');
+            btn.disabled = true;
+            esito('doc-esito', 'info', 'Invio in corso…');
+            try {
+                const r = await chiamaServer({ action: 'docente', nome, casa: doc.casa, colori, frutta });
+                if (!r.ok) throw r;
+                const punti = colori + frutta;
+                esito('doc-esito', 'ok', `Registrazione di ${esc(nome)} salvata alle ${esc(r.ora)}: ${punti} ${punti === 1 ? 'punto' : 'punti'} per ${teamById(doc.casa).name}.`);
+                // modulo pulito per il collega successivo sullo stesso dispositivo
+                $('doc-nome').value = '';
+                $('doc-colori').checked = false;
+                $('doc-frutta').checked = false;
+                scegliCasaDocente('');
+                await caricaGiornata('docenti');
+            } catch (e) {
+                esito('doc-esito', 'avviso', messaggioErrore(e));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function renderGiornataDocenti() {
+            const n = doc.docenti.length;
+            $('doc-giornata-totale').textContent = `${n} ${n === 1 ? 'docente' : 'docenti'}`;
+            $('doc-conteggio').textContent = n;
+            renderClassifica($('doc-giornata-body'), aggregaDocenti(doc.docenti), {
+                badge: false,
+                dettaglio: r => r.members ? `${r.points}/${r.maxPoints} punti · ${r.members} ${r.members === 1 ? 'docente' : 'docenti'}` : 'nessun docente'
+            });
+            const tag = (si, testo) => `<span class="tag${si ? ' si' : ''}">${testo}</span>`;
+            $('doc-elenco').innerHTML = n
+                ? [...doc.docenti].sort((a, b) => a.nome.localeCompare(b.nome, 'it')).map(d => {
+                    const t = teamById(d.casa);
+                    return `
+                    <li class="docente">
+                        <span class="punto-casa ${t ? colors[t.color] : ''}" title="${t ? t.name : ''}"></span>
+                        <span class="docente-nome">${esc(d.nome)}</span>
+                        ${tag(d.colori, 'COLORI')}${tag(d.frutta, 'FRUTTA')}
+                    </li>`;
+                }).join('')
+                : '<li class="vuoto basso">Ancora nessun docente registrato.</li>';
+        }
+
+        /* =========================================================
+           SFIDA TRA CASE / TORNEI (funzionamento invariato)
+           ========================================================= */
+
+        function initSfida() {
+            $('sfida-data').textContent = dataBreve(adessoRoma().iso);
+            creaPannello({ contenitore: $('team-inputs'), tbody: $('leaderboard-body'), prefisso: 'sfida' });
+        }
+
+        function exportLeaderboardImage() {
+            const classVal = $('class-name-input').value.trim();
+            const classSuffix = classVal ? `_${classVal.replace(/[^a-zA-Z0-9_-]/g, '_')}` : '';
+            const fileName = `Classifica_HouseDay${classSuffix}_${dataBreve(adessoRoma().iso).replace(/\//g, '-')}.png`;
+            esportaPNG($('leaderboard-card'), fileName, $('btn-export'));
+        }
+
+        /* =========================================================
+           MENU E NAVIGAZIONE (#sfida, #studenti, #docenti: si possono aprire da un link diretto)
+           ========================================================= */
+
+        const TITOLI = { sfida: 'Sfida tra Case · Tornei', studenti: 'House Day · Studenti', docenti: 'House Day · Docenti' };
+
+        function vistaCorrente() {
+            const v = location.hash.slice(1);
+            return TITOLI[v] ? v : 'menu';
+        }
+
+        function aggiornaMenu() {
+            const p = pillStato(statoHouseDay());
+            $('menu-stato-studenti').innerHTML = p;
+            $('menu-stato-docenti').innerHTML = p;
+        }
+
+        function vai() {
+            const v = vistaCorrente();
+            document.body.dataset.vista = v;
+            document.querySelectorAll('[data-schermata]').forEach(el => el.hidden = el.id !== 'vista-' + v);
+            $('barra').hidden = v === 'menu';
+            fermaAggiornamento();
+            document.title = v === 'menu' ? 'House Day' : `${TITOLI[v]} — House Day`;
+            if (v === 'menu') aggiornaMenu();
+            else $('barra-titolo').textContent = TITOLI[v];
+            if (v === 'sfida') { $('barra-data').textContent = ''; $('barra-stato').innerHTML = ''; }
+            if (v === 'studenti' || v === 'docenti') mostraHouseDay(v);
+            window.scrollTo(0, 0);
+        }
+
+        /* Ogni 15 secondi: alle 8:00 si apre, alle 11:00 si chiude, il conto alla rovescia scorre. */
+        function controllaOrario() {
+            const v = vistaCorrente();
+            if (v === 'menu') return aggiornaMenu();
+            if (v !== 'studenti' && v !== 'docenti') return;
+            const s = statoHouseDay();
+            if (s.fase !== faseMostrata) return mostraHouseDay(v);
+            $('barra-stato').innerHTML = pillStato(s);
+            if (s.fase === 'presto' || s.fase === 'chiuso') $(v === 'studenti' ? 'stud-chiuso' : 'doc-chiuso').innerHTML = htmlChiuso(s, v);
+        }
+
+        initSfida();
+        initStudenti();
+        initDocenti();
+        window.addEventListener('hashchange', vai);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) { controllaOrario(); const v = vistaCorrente(); if (v === 'studenti' || v === 'docenti') caricaGiornata(v); } });
+        setInterval(controllaOrario, 15000);
+        vai();
     </script>
 </body>
 </html>
