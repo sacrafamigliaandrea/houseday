@@ -716,9 +716,30 @@
            ALBO D'ORO
            ========================================================= */
 
+        /* in primo piano la classifica progressiva; sotto, più leggeri, Albo d'Oro, vittorie e video */
         .vista-albo { width: 100%; max-width: 72rem; margin: 0 auto; padding: .75rem; }
+        .menu-etichetta.secondarie { margin-top: 1.75rem; }
         .albo-griglia { display: grid; gap: 1.25rem; align-items: flex-start; }
         .albo-destra { gap: 1.25rem; }
+        .albo-elenco { margin-top: .75rem; }
+        .video-esito { margin-top: .5rem; }
+        .albo-elenco .vincitore { padding-top: .375rem; padding-bottom: .375rem; }
+        .albo-elenco .chip-casa { min-width: 8.5rem; padding-top: .25rem; padding-bottom: .25rem; font-size: .8125rem; }
+
+        /* classifica progressiva grande */
+        .vittorie.grande { gap: .875rem; }
+        .vittorie.grande .ufficiale { grid-template-columns: 2rem 6.5rem minmax(0, 1fr) 3rem; gap: .625rem; }
+        .vittorie.grande .vittoria-nome { display: flex; align-items: center; gap: .375rem; font-size: .9375rem; }
+        .vittorie.grande .vittoria-barra { height: 1.375rem; }
+        .vittorie.grande .vittoria-n { font-size: 1.5rem; }
+        @media (min-width: 640px) {
+            .vittorie.grande { gap: 1rem; padding: .25rem .5rem; }
+            .vittorie.grande .ufficiale { grid-template-columns: 2.5rem 10rem minmax(0, 1fr) 4.5rem; gap: 1rem; }
+            .vittorie.grande .pos { width: 2.25rem; height: 2.25rem; font-size: 1rem; }
+            .vittorie.grande .vittoria-nome { font-size: 1.125rem; }
+            .vittorie.grande .vittoria-barra { height: 1.625rem; border-radius: .5rem; }
+            .vittorie.grande .vittoria-n { font-size: 2rem; }
+        }
 
         /* Vincitori per anno */
         .vincitore { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .5rem .25rem; }
@@ -741,9 +762,30 @@
         .vincitore.ultimo .vincitore-anno { color: var(--grigio-800); }
         .chip-casa .trofeo { color: currentColor; }
 
-        /* Vittorie per Casa */
+        /* Vittorie per Casa: una card per Casa, una stella per ogni anno vinto (2×2 su telefono, 4 in riga da 768 px) */
+        .stelle-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: .75rem 0 1.25rem; }
+        .casa-stelle {
+            border-width: 1px;
+            border-color: var(--casa-bordo);
+            background-color: var(--casa-sfondo);
+            border-radius: 1rem;
+            padding: .875rem .75rem;
+            box-shadow: var(--ombra-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .375rem;
+            text-align: center;
+        }
+        .casa-stelle-nome { font-size: 1rem; line-height: 1.25rem; font-weight: 800; color: var(--casa-testo); }
+        .stelle { display: flex; flex-wrap: wrap; justify-content: center; gap: .125rem; min-height: 1.75rem; }
+        .stelle svg { width: 1.75rem; height: 1.75rem; color: #f59e0b; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .15)); }
+        .casa-stelle-n { font-size: .8125rem; font-weight: 700; color: var(--grigio-700); }
+        .casa-stelle-anni { font-size: 11px; line-height: 1.4; color: var(--grigio-500); }
+        .casa-stelle-anni span { white-space: nowrap; }   /* un anno non va mai a capo a metà */
+
+        /* Righe della classifica progressiva: nome, barra e punti */
         .vittorie { display: flex; flex-direction: column; gap: .625rem; }
-        .vittoria { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 2rem; align-items: center; gap: .75rem; }
         .vittoria-nome { font-size: .875rem; font-weight: 800; color: var(--casa-testo); }
         .vittoria-barra { height: 1.125rem; border-radius: .375rem; background-color: var(--grigio-100); overflow: hidden; }
         .vittoria-barra i { display: block; height: 100%; border-radius: .375rem; background-color: var(--casa-pieno); }
@@ -891,6 +933,7 @@
             .banner-titolo h1 { font-size: 3rem; line-height: 1; }
             .barra { padding-left: 1.5rem; padding-right: 1.5rem; }
             .podio { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .stelle-griglia { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
             .home-sommario { flex-wrap: nowrap; }
             .home-minimal { flex: 1 1 auto; justify-content: center; }
             .podio-testa { flex-wrap: nowrap; }
@@ -1027,13 +1070,13 @@
                     <p class="menu-desc">Inserisci membri e punti delle quattro Case, guarda la classifica e scarica la card.</p>
                     <span class="pill pill-grigio menu-stato"><span class="pill-punto"></span>Sempre disponibile</span>
                 </a>
-                <a href="#albo" class="glass-panel scheda-menu">
+                <a href="#classifica" class="glass-panel scheda-menu">
                     <span class="menu-icona oro">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.5a.56.56 0 0 1 1.04 0l2.13 5.11a.56.56 0 0 0 .47.35l5.52.44c.5.04.7.66.32.99l-4.2 3.6a.56.56 0 0 0-.18.56l1.28 5.39a.56.56 0 0 1-.84.61l-4.72-2.89a.56.56 0 0 0-.59 0l-4.72 2.89a.56.56 0 0 1-.84-.61l1.28-5.39a.56.56 0 0 0-.18-.56l-4.2-3.6a.56.56 0 0 1 .32-.99l5.52-.44a.56.56 0 0 0 .47-.35z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.13C3 12.5 3.5 12 4.13 12h2.25c.62 0 1.12.5 1.12 1.13v6.75c0 .62-.5 1.12-1.12 1.12H4.13C3.5 21 3 20.5 3 19.88v-6.75zM9.75 8.63c0-.63.5-1.13 1.13-1.13h2.25c.62 0 1.12.5 1.12 1.13v11.25c0 .62-.5 1.12-1.12 1.12h-2.25c-.63 0-1.13-.5-1.13-1.12V8.63zM16.5 4.13C16.5 3.5 17 3 17.63 3h2.25C20.5 3 21 3.5 21 4.13v15.75c0 .62-.5 1.12-1.12 1.12h-2.25c-.63 0-1.13-.5-1.13-1.12V4.13z" /></svg>
                     </span>
-                    <h3 class="menu-titolo">Albo d'Oro</h3>
-                    <p class="menu-desc">Le Case vincitrici anno per anno, le vittorie di ogni Casa e il punteggio dell'anno in corso.</p>
-                    <span id="menu-stato-albo" class="menu-stato"></span>
+                    <h3 class="menu-titolo">Classifica progressiva</h3>
+                    <p class="menu-desc">Il punteggio ufficiale delle Case di quest'anno, dal registro elettronico. Dentro anche l'Albo d'Oro e il video delle Case.</p>
+                    <span id="menu-stato-classifica" class="menu-stato"></span>
                 </a>
             </div>
         </section>
@@ -1274,60 +1317,50 @@
             </div>
         </section>
 
-        <!-- ============ ALBO D'ORO ============ -->
-        <section id="vista-albo" data-schermata hidden class="vista-albo">
-            <div class="albo-griglia">
+        <!-- ============ CLASSIFICA PROGRESSIVA (con l'Albo d'Oro come informazioni secondarie) ============ -->
+        <section id="vista-classifica" data-schermata hidden class="vista-albo">
 
-                <!-- 1. vincitori per anno -->
-                <section class="glass-panel card-classifica">
-                    <div class="card-testa scuola">
-                        <div class="testa-gruppo">
-                            <span class="testa-etichetta">Vincitori per anno</span>
-                            <span class="testa-sotto">Albo d'Oro delle Case</span>
-                        </div>
-                        <span id="albo-anni" class="testa-valore a-destra"></span>
+            <!-- 1. in primo piano: classifica progressiva ufficiale dell'anno (registro elettronico, tramite lo script) -->
+            <section class="glass-panel card-classifica">
+                <div class="card-testa scuola">
+                    <div class="testa-gruppo">
+                        <span class="testa-etichetta">Classifica progressiva</span>
+                        <span id="albo-anno-corrente" class="testa-sotto"></span>
                     </div>
-                    <div class="card-corpo">
-                        <ol id="albo-vincitori" class="righe-divise"></ol>
+                    <span id="albo-ufficiale-ora" class="testa-data"></span>
+                </div>
+                <div class="card-corpo">
+                    <div id="albo-ufficiale" class="vittorie grande"></div>
+                </div>
+                <div class="card-piede">
+                    Fonte: <a id="albo-registro" class="link-fonte" target="_blank" rel="noopener">registro elettronico</a> · si aggiorna da sola ogni 5 minuti
+                </div>
+            </section>
+
+            <!-- 2. informazioni secondarie: Albo d'Oro delle Case -->
+            <p class="menu-etichetta secondarie">Albo d'Oro delle Case</p>
+
+            <!-- 2a. subito dopo la classifica: una card per Casa, una stella per ogni anno vinto -->
+            <div class="lista-testa">
+                <h3 class="lista-titolo">Vittorie per Casa</h3>
+                <span id="albo-dal" class="aggiornamento"></span>
+            </div>
+            <div id="albo-vittorie" class="stelle-griglia"></div>
+
+            <!-- 2b. vincitori anno per anno e video -->
+            <div class="albo-griglia">
+                <section class="glass-panel riquadro">
+                    <div class="lista-testa">
+                        <h3 class="lista-titolo">Vincitori per anno</h3>
+                        <span id="albo-anni" class="aggiornamento"></span>
                     </div>
-                    <div class="card-piede">Albo d'Oro • Scuola Sacra Famiglia</div>
+                    <ol id="albo-vincitori" class="righe-divise albo-elenco"></ol>
                 </section>
 
                 <div class="colonna albo-destra">
-                    <!-- 2. classifica ufficiale dell'anno in corso (dal registro elettronico, tramite lo script) -->
-                    <section class="glass-panel card-classifica">
-                        <div class="card-testa scuola">
-                            <div class="testa-gruppo">
-                                <span class="testa-etichetta">Classifica ufficiale</span>
-                                <span id="albo-anno-corrente" class="testa-sotto"></span>
-                            </div>
-                            <span id="albo-ufficiale-ora" class="testa-data"></span>
-                        </div>
-                        <div class="card-corpo">
-                            <div id="albo-ufficiale" class="vittorie"></div>
-                        </div>
-                        <div class="card-piede">
-                            Fonte: <a id="albo-registro" class="link-fonte" target="_blank" rel="noopener">registro elettronico</a> · si aggiorna da sola ogni 5 minuti
-                        </div>
-                    </section>
-
-                    <!-- 3. vittorie per Casa -->
-                    <section class="glass-panel card-classifica">
-                        <div class="card-testa scuola">
-                            <div class="testa-gruppo">
-                                <span class="testa-etichetta">Vittorie per Casa</span>
-                                <span id="albo-dal" class="testa-sotto"></span>
-                            </div>
-                        </div>
-                        <div class="card-corpo">
-                            <div id="albo-vittorie" class="vittorie"></div>
-                        </div>
-                    </section>
-
-                    <!-- 4. video delle Case -->
                     <section class="glass-panel riquadro">
                         <h3 class="lista-titolo">Il video delle Case</h3>
-                        <div class="video-palco" style="margin-top: .75rem;">
+                        <div class="video-palco albo-elenco">
                             <div id="albo-yt"></div>
                             <img id="albo-copertina" class="video-copertina" alt="Avvia il video delle Case">
                         </div>
@@ -1340,7 +1373,7 @@
                             <span id="video-tempo" class="video-tempo">0:00</span>
                             <button id="video-muto" type="button" class="video-btn chiaro" aria-label="Disattiva l'audio" disabled></button>
                         </div>
-                        <div id="video-esito" class="nota-classe" style="margin-top: .5rem;"></div>
+                        <div id="video-esito" class="nota-classe video-esito"></div>
                     </section>
                 </div>
             </div>
@@ -1426,6 +1459,7 @@
 
         const ICONA = {
             trofeo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="trofeo" role="img" aria-label="Primo posto"><path fill="currentColor" d="M7 3.5h10V9a5 5 0 0 1-10 0V3.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 5.5H4.5V7a3 3 0 0 0 3 3M17 5.5h2.5V7a3 3 0 0 1-3 3"/><path fill="currentColor" d="M11 13.5h2V17h-2z"/><rect fill="currentColor" x="7.5" y="17" width="9" height="3.5" rx="1"/></svg>',
+            stella: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.79 3.21c.45-1.08 1.97-1.08 2.42 0l2.08 5 5.4.44c1.17.09 1.64 1.54.75 2.3l-4.11 3.53 1.25 5.27c.27 1.14-.96 2.04-1.96 1.43L12 18.35l-4.62 2.83c-1 .61-2.24-.29-1.96-1.43l1.25-5.27-4.11-3.53c-.89-.76-.42-2.21.75-2.3l5.4-.44 2.08-5z"/></svg>',
             spunta: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0z" clip-rule="evenodd"/></svg>',
             lucchetto: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
             ok: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
@@ -2211,30 +2245,34 @@
         function initAlbo() {
             const ultimo = ALBO.length - 1;
             $('albo-anni').textContent = `${ALBO.length} anni`;
+            // dal più recente: l'ultimo vincitore in cima, con il trofeo
             $('albo-vincitori').innerHTML = ALBO.map((r, i) => {
                 const t = teamById(r.casa);
                 return `<li class="vincitore${i === ultimo ? ' ultimo' : ''}">
                     <span class="vincitore-anno">${r.anno}</span>
                     <span class="chip-casa ${colors[t.color]}">${t.name}${i === ultimo ? ICONA.trofeo : ''}</span>
                 </li>`;
+            }).reverse().join('');
+
+            // vittorie per Casa: una card per Casa con una stella per ogni anno vinto; più vittorie prima
+            const vittorie = teams.map(t => ({ team: t, anni: ALBO.filter(r => r.casa === t.id).map(r => r.anno) }))
+                .sort((a, b) => b.anni.length - a.anni.length);
+            const annoBreve = a => a.replace(/–\d\d(\d\d)$/, '–$1');   // 2017–2018 → 2017–18
+            $('albo-dal').textContent = `dal ${ALBO[0].anno} al ${ALBO[ultimo].anno}`;
+            $('albo-vittorie').innerHTML = vittorie.map(v => {
+                const n = v.anni.length, testo = n ? `${n} ${n === 1 ? 'vittoria' : 'vittorie'}` : 'Nessuna vittoria';
+                return `
+                <div class="casa-stelle ${colors[v.team.color]}">
+                    <span class="casa-stelle-nome">${v.team.name}</span>
+                    <span class="stelle" role="img" aria-label="${testo}">${ICONA.stella.repeat(n)}</span>
+                    <span class="casa-stelle-n">${testo}</span>
+                    <span class="casa-stelle-anni">${v.anni.map(a => `<span>${annoBreve(a)}</span>`).join(' · ')}</span>
+                </div>`;
             }).join('');
 
-            // vittorie per Casa: più titoli in alto, a parità l'ordine delle Case
-            const vittorie = teams.map(t => ({ team: t, n: ALBO.filter(r => r.casa === t.id).length })).sort((a, b) => b.n - a.n);
-            const max = Math.max(1, ...vittorie.map(v => v.n));
-            $('albo-dal').textContent = `dal ${ALBO[0].anno} al ${ALBO[ultimo].anno}`;
-            $('albo-vittorie').innerHTML = vittorie.map(v => `
-                <div class="vittoria ${colors[v.team.color]}">
-                    <span class="vittoria-nome">${v.team.name}</span>
-                    <span class="vittoria-barra"><i style="width:${v.n / max * 100}%"></i></span>
-                    <span class="vittoria-n">${v.n}</span>
-                </div>`).join('');
-
-            $('albo-anno-corrente').textContent = `Anno scolastico ${annoScolastico()} · punteggio progressivo`;
+            $('albo-anno-corrente').textContent = `Anno scolastico ${annoScolastico()} · punteggio ufficiale dal registro`;
             $('albo-registro').href = URL_REGISTRO;
-
-            const vincitore = teamById(ALBO[ultimo].casa);
-            $('menu-stato-albo').innerHTML = pill('grigio', `Ultimo vincitore: ${vincitore.name}`);
+            $('menu-stato-classifica').innerHTML = pill('grigio', `Anno ${annoScolastico()}`);   // poi: chi è in testa
             initVideo();
         }
 
@@ -2250,11 +2288,14 @@
                 $('albo-ufficiale').innerHTML = righe.map(x => `
                     <div class="ufficiale ${colors[x.team.color]}">
                         <span class="pos ${classeBadge(x.pos, true)}">${x.pos}</span>
-                        <span class="vittoria-nome">${x.team.name}</span>
+                        <span class="vittoria-nome">${x.team.name}${x.pos === 1 ? ICONA.trofeo : ''}</span>
                         <span class="vittoria-barra"><i style="width:${x.punti / max * 100}%"></i></span>
                         <span class="vittoria-n">${x.punti}</span>
                     </div>`).join('');
                 $('albo-ufficiale-ora').textContent = `aggiornata alle ${esc(r.ora)}`;
+                // nella scheda del menu: chi è in testa
+                const primi = righe.filter(x => x.pos === 1);
+                $('menu-stato-classifica').innerHTML = pill('grigio', `In testa: ${primi.map(x => x.team.name).join(' e ')} · ${primi[0].punti}`);
             } catch (e) {
                 // senza script aggiornato o con il modulo spento: messaggio e link alla pagina del registro
                 const motivo = e && e.messaggio ? esc(e.messaggio) : 'Classifica non disponibile in questo momento';
@@ -2363,10 +2404,11 @@
            MENU E NAVIGAZIONE (#studenti, #docenti, #sfida, #albo: si possono aprire da un link diretto)
            ========================================================= */
 
-        const TITOLI = { sfida: 'Sfide tra Case – in classe e tornei', studenti: 'House Day · Studenti', docenti: 'House Day · Docenti', albo: "Albo d'Oro" };
+        const TITOLI = { sfida: 'Sfide tra Case – in classe e tornei', studenti: 'House Day · Studenti', docenti: 'House Day · Docenti', classifica: 'Classifica progressiva' };
 
         function vistaCorrente() {
-            const v = location.hash.slice(1);
+            let v = location.hash.slice(1);
+            if (v === 'albo') v = 'classifica';   // vecchio indirizzo #albo
             return TITOLI[v] ? v : 'menu';
         }
 
@@ -2436,6 +2478,7 @@
             fermaAggiornamento();
             aggiornaMenu();
             caricaHome();
+            caricaRegistro();   // per "In testa: …" nella scheda della classifica progressiva
             homeMostrata = statoHome();
             const data = ultimoHouseDay();
             if (data && (PROVA || homeInCorso(data))) timerGiornata = setInterval(caricaHome, 30000);
@@ -2450,8 +2493,8 @@
             document.title = v === 'menu' ? 'House Day' : `${TITOLI[v]} — House Day`;
             if (v === 'menu') mostraMenu();
             else $('barra-titolo').textContent = TITOLI[v];
-            if (v === 'sfida' || v === 'albo') { $('barra-data').textContent = ''; $('barra-stato').innerHTML = ''; }
-            if (v === 'albo') {
+            if (v === 'sfida' || v === 'classifica') { $('barra-data').textContent = ''; $('barra-stato').innerHTML = ''; }
+            if (v === 'classifica') {
                 caricaVideo();
                 caricaRegistro();
                 timerGiornata = setInterval(caricaRegistro, 5 * 60000);
