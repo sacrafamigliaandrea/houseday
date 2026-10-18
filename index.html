@@ -82,7 +82,7 @@
         button, select { text-transform: none; }
         button { -webkit-appearance: button; background-color: transparent; background-image: none; cursor: pointer; }
         :disabled { cursor: default; }
-        ul { list-style: none; margin: 0; padding: 0; }
+        ul, ol { list-style: none; margin: 0; padding: 0; }
         input::placeholder { opacity: 1; color: #9ca3af; }
         img, svg { display: block; vertical-align: middle; }
         img { max-width: 100%; height: auto; }
@@ -211,8 +211,9 @@
             letter-spacing: .1em;
             margin-bottom: 1rem;
         }
-        .menu-griglia { display: grid; gap: 1rem; }
-        .scheda-menu { border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; }
+        /* quattro schede: 2×2 su telefono e tablet, 4 in riga da 1024 px; sul telefono senza descrizione */
+        .menu-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+        .scheda-menu { border-radius: 1.5rem; padding: 1rem; display: flex; flex-direction: column; gap: .625rem; }
         .scheda-menu:hover { transform: translateY(-.125rem); box-shadow: var(--ombra-lg); }
         .menu-icona {
             width: 3rem;
@@ -225,11 +226,12 @@
             justify-content: center;
         }
         .menu-icona.piena { background-color: var(--scuola); color: #fff; }
+        .menu-icona.oro { background-color: #fef3c7; color: #b45309; }
         .menu-icona svg, .chiuso-icona svg { width: 1.75rem; height: 1.75rem; }
-        .menu-titolo { font-size: 1.25rem; line-height: 1.25; font-weight: 800; color: var(--grigio-800); }
+        .menu-titolo { font-size: 1.0625rem; line-height: 1.25; font-weight: 800; color: var(--grigio-800); flex: 1 1 0%; }
         .menu-sotto { color: var(--grigio-400); font-weight: 700; }
         .menu-sotto-scuola { color: var(--scuola); }
-        .menu-desc { font-size: .875rem; line-height: 1.625; color: var(--grigio-500); flex: 1 1 0%; }
+        .menu-desc { display: none; font-size: .875rem; line-height: 1.625; color: var(--grigio-500); flex: 1 1 0%; }
         .menu-stato { align-self: flex-start; }
 
         /* Classifica dell'ultimo House Day (studenti + docenti) in cima al menu */
@@ -710,6 +712,79 @@
         .tag { font-size: 10px; font-weight: 700; padding: .125rem .375rem; border-radius: .25rem; background-color: var(--grigio-100); color: var(--grigio-400); }
         .tag.si { background-color: #d1fae5; color: #065f46; }
 
+        /* =========================================================
+           ALBO D'ORO
+           ========================================================= */
+
+        .vista-albo { width: 100%; max-width: 72rem; margin: 0 auto; padding: .75rem; }
+        .albo-griglia { display: grid; gap: 1.25rem; align-items: flex-start; }
+        .albo-destra { gap: 1.25rem; }
+
+        /* Vincitori per anno */
+        .vincitore { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .5rem .25rem; }
+        .vincitore-anno { font-size: .875rem; font-weight: 700; color: var(--grigio-600); font-variant-numeric: tabular-nums; }
+        .chip-casa {
+            display: inline-flex;
+            align-items: center;
+            gap: .375rem;
+            min-width: 9.5rem;
+            justify-content: center;
+            padding: .3125rem .75rem;
+            border-radius: .625rem;
+            background-color: var(--casa-pieno);
+            color: var(--casa-pieno-testo);
+            font-size: .875rem;
+            font-weight: 800;
+            box-shadow: var(--ombra-sm);
+        }
+        .vincitore.ultimo { background-color: #fffbeb; border-radius: .75rem; padding-left: .5rem; padding-right: .5rem; }
+        .vincitore.ultimo .vincitore-anno { color: var(--grigio-800); }
+        .chip-casa .trofeo { color: currentColor; }
+
+        /* Vittorie per Casa */
+        .vittorie { display: flex; flex-direction: column; gap: .625rem; }
+        .vittoria { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 2rem; align-items: center; gap: .75rem; }
+        .vittoria-nome { font-size: .875rem; font-weight: 800; color: var(--casa-testo); }
+        .vittoria-barra { height: 1.125rem; border-radius: .375rem; background-color: var(--grigio-100); overflow: hidden; }
+        .vittoria-barra i { display: block; height: 100%; border-radius: .375rem; background-color: var(--casa-pieno); }
+        .vittoria-n { text-align: right; font-size: 1.125rem; font-weight: 900; color: var(--grigio-800); font-variant-numeric: tabular-nums; }
+
+        /* Classifica ufficiale dell'anno (registro elettronico): posizione, Casa, barra, punti */
+        .ufficiale { display: grid; grid-template-columns: 2rem 7.5rem minmax(0, 1fr) 3rem; align-items: center; gap: .75rem; }
+        .ufficiale .vittoria-n { font-size: 1.25rem; }
+        .link-fonte { color: var(--scuola); font-weight: 600; text-decoration: underline; }
+
+        /* Video delle Case: comandi solo nostri, nessun clic arriva a YouTube */
+        .video-palco { position: relative; aspect-ratio: 16 / 9; border-radius: .875rem; overflow: hidden; background-color: #000; }
+        .video-palco > div, .video-palco iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+        .video-copertina {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .video-comandi { display: flex; align-items: center; gap: .5rem; margin-top: .625rem; }
+        .video-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            flex-shrink: 0;
+            border-radius: 9999px;
+            background-color: var(--scuola);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-btn.chiaro { background-color: #fff; color: var(--scuola); border-width: 1px; border-color: var(--grigio-200); }
+        .video-btn:disabled { opacity: .45; cursor: default; }
+        .video-btn svg { width: 1.125rem; height: 1.125rem; }
+        .video-btn:focus-visible { outline: 2px solid transparent; box-shadow: var(--anello); }
+        .video-avanzamento { flex: 1 1 0%; min-width: 0; accent-color: var(--scuola); }
+        .video-tempo { font-size: .75rem; font-weight: 600; color: var(--grigio-500); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
         /* Riquadri di avviso: verde = fatto, ambra = attenzione, blu = informazione (mai rosso) */
         .box {
             display: flex;
@@ -779,6 +854,10 @@
             .barra-stato { width: auto; }
             .vista-menu { padding: 1.5rem; }
             .menu-etichetta { font-size: .875rem; line-height: 1.25rem; }
+            .menu-griglia { gap: 1rem; }
+            .scheda-menu { padding: 1.25rem; gap: .75rem; }
+            .menu-titolo { font-size: 1.25rem; flex: none; }
+            .menu-desc { display: block; }
             .griglia-case { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .griglia-case.sfida { gap: 1rem; }
             .pannello-casa { padding: 1rem; }
@@ -801,6 +880,7 @@
             .efficienza { padding-left: .75rem; padding-right: .75rem; font-size: .875rem; line-height: 1.25rem; }
             .sfida-layout { padding: 1rem; gap: 1.5rem; }
             .vista-hd { padding: 1rem; }
+            .vista-albo { padding: 1.5rem; }
             .riquadro { padding: 1rem; }
             .doc-form { padding: 1.25rem; }
             .casa-btn { font-size: 1rem; line-height: 1.5rem; }
@@ -810,7 +890,6 @@
         @media (min-width: 768px) {
             .banner-titolo h1 { font-size: 3rem; line-height: 1; }
             .barra { padding-left: 1.5rem; padding-right: 1.5rem; }
-            .menu-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .podio { grid-template-columns: repeat(4, minmax(0, 1fr)); }
             .home-sommario { flex-wrap: nowrap; }
             .home-minimal { flex: 1 1 auto; justify-content: center; }
@@ -825,8 +904,19 @@
 
         /* House Day: tre colonne mentre si inseriscono i punteggi, due a inserimento chiuso */
         .hd-griglia.concluso .area-form,
-        .hd-griglia.concluso .area-anteprima { display: none; }
+        .hd-griglia.concluso .area-anteprima,
+        .hd-griglia.bloccato .area-form,
+        .hd-griglia.bloccato .area-anteprima { display: none; }
+
+        /* Accesso con la password dei docenti (le classifiche restano visibili a tutti) */
+        .accesso { max-width: 28rem; margin: 0 auto 1.25rem; border-radius: 1.5rem; padding: 1.5rem; display: flex; flex-direction: column; gap: .75rem; text-align: center; }
+        .accesso-titolo { font-size: 1.125rem; line-height: 1.5rem; font-weight: 800; color: var(--grigio-800); }
+        .accesso-campo { text-align: center; letter-spacing: .05em; }
+        .accesso .box { text-align: left; }
+        .btn-blocca { margin-left: .375rem; font-weight: 700; text-decoration: underline; color: inherit; }
         @media (min-width: 1024px) {
+            .menu-griglia { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .albo-griglia { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
             .sfida-layout { flex-direction: row; }
             .hd-griglia {
                 grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
@@ -839,7 +929,9 @@
                 grid-template-rows: auto;
             }
             .hd-griglia.concluso,
-            #doc-aperto.hd-griglia.concluso {
+            #doc-aperto.hd-griglia.concluso,
+            .hd-griglia.bloccato,
+            #doc-aperto.hd-griglia.bloccato {
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
                 grid-template-areas: "giornata lista";
                 grid-template-rows: auto;
@@ -935,6 +1027,14 @@
                     <p class="menu-desc">Inserisci membri e punti delle quattro Case, guarda la classifica e scarica la card.</p>
                     <span class="pill pill-grigio menu-stato"><span class="pill-punto"></span>Sempre disponibile</span>
                 </a>
+                <a href="#albo" class="glass-panel scheda-menu">
+                    <span class="menu-icona oro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.5a.56.56 0 0 1 1.04 0l2.13 5.11a.56.56 0 0 0 .47.35l5.52.44c.5.04.7.66.32.99l-4.2 3.6a.56.56 0 0 0-.18.56l1.28 5.39a.56.56 0 0 1-.84.61l-4.72-2.89a.56.56 0 0 0-.59 0l-4.72 2.89a.56.56 0 0 1-.84-.61l1.28-5.39a.56.56 0 0 0-.18-.56l-4.2-3.6a.56.56 0 0 1 .32-.99l5.52-.44a.56.56 0 0 0 .47-.35z" /></svg>
+                    </span>
+                    <h3 class="menu-titolo">Albo d'Oro</h3>
+                    <p class="menu-desc">Le Case vincitrici anno per anno, le vittorie di ogni Casa e il punteggio dell'anno in corso.</p>
+                    <span id="menu-stato-albo" class="menu-stato"></span>
+                </a>
             </div>
         </section>
 
@@ -1010,6 +1110,7 @@
         <section id="vista-studenti" data-schermata hidden class="vista-hd">
             <div id="stud-avvisi" class="avvisi"></div>
             <div id="stud-chiuso" hidden></div>
+            <div id="stud-accesso" hidden></div>
             <div id="stud-aperto" hidden class="hd-griglia">
 
                 <!-- 1. classe e punteggi -->
@@ -1093,6 +1194,7 @@
         <section id="vista-docenti" data-schermata hidden class="vista-hd">
             <div id="doc-avvisi" class="avvisi"></div>
             <div id="doc-chiuso" hidden></div>
+            <div id="doc-accesso" hidden></div>
             <div id="doc-aperto" hidden class="hd-griglia">
 
                 <!-- 1. registrazione del docente -->
@@ -1169,6 +1271,78 @@
                     </div>
                     <ul id="doc-elenco" class="elenco-docenti righe-divise"></ul>
                 </section>
+            </div>
+        </section>
+
+        <!-- ============ ALBO D'ORO ============ -->
+        <section id="vista-albo" data-schermata hidden class="vista-albo">
+            <div class="albo-griglia">
+
+                <!-- 1. vincitori per anno -->
+                <section class="glass-panel card-classifica">
+                    <div class="card-testa scuola">
+                        <div class="testa-gruppo">
+                            <span class="testa-etichetta">Vincitori per anno</span>
+                            <span class="testa-sotto">Albo d'Oro delle Case</span>
+                        </div>
+                        <span id="albo-anni" class="testa-valore a-destra"></span>
+                    </div>
+                    <div class="card-corpo">
+                        <ol id="albo-vincitori" class="righe-divise"></ol>
+                    </div>
+                    <div class="card-piede">Albo d'Oro • Scuola Sacra Famiglia</div>
+                </section>
+
+                <div class="colonna albo-destra">
+                    <!-- 2. classifica ufficiale dell'anno in corso (dal registro elettronico, tramite lo script) -->
+                    <section class="glass-panel card-classifica">
+                        <div class="card-testa scuola">
+                            <div class="testa-gruppo">
+                                <span class="testa-etichetta">Classifica ufficiale</span>
+                                <span id="albo-anno-corrente" class="testa-sotto"></span>
+                            </div>
+                            <span id="albo-ufficiale-ora" class="testa-data"></span>
+                        </div>
+                        <div class="card-corpo">
+                            <div id="albo-ufficiale" class="vittorie"></div>
+                        </div>
+                        <div class="card-piede">
+                            Fonte: <a id="albo-registro" class="link-fonte" target="_blank" rel="noopener">registro elettronico</a> · si aggiorna da sola ogni 5 minuti
+                        </div>
+                    </section>
+
+                    <!-- 3. vittorie per Casa -->
+                    <section class="glass-panel card-classifica">
+                        <div class="card-testa scuola">
+                            <div class="testa-gruppo">
+                                <span class="testa-etichetta">Vittorie per Casa</span>
+                                <span id="albo-dal" class="testa-sotto"></span>
+                            </div>
+                        </div>
+                        <div class="card-corpo">
+                            <div id="albo-vittorie" class="vittorie"></div>
+                        </div>
+                    </section>
+
+                    <!-- 4. video delle Case -->
+                    <section class="glass-panel riquadro">
+                        <h3 class="lista-titolo">Il video delle Case</h3>
+                        <div class="video-palco" style="margin-top: .75rem;">
+                            <div id="albo-yt"></div>
+                            <img id="albo-copertina" class="video-copertina" alt="Avvia il video delle Case">
+                        </div>
+                        <div class="video-comandi">
+                            <button id="video-play" type="button" class="video-btn" aria-label="Riproduci" disabled></button>
+                            <button id="video-stop" type="button" class="video-btn chiaro" aria-label="Ferma e torna all'inizio" disabled>
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+                            </button>
+                            <input id="video-avanzamento" class="video-avanzamento" type="range" min="0" max="1000" value="0" aria-label="Avanzamento del video" disabled>
+                            <span id="video-tempo" class="video-tempo">0:00</span>
+                            <button id="video-muto" type="button" class="video-btn chiaro" aria-label="Disattiva l'audio" disabled></button>
+                        </div>
+                        <div id="video-esito" class="nota-classe" style="margin-top: .5rem;"></div>
+                    </section>
+                </div>
             </div>
         </section>
     </main>
@@ -1485,6 +1659,9 @@
             if (PROVA) a.push(box('avviso', `<b>Modalità prova</b>: nessun limite d'orario.${URL_HOUSEDAY ? ' I dati vanno nei fogli «Prova» e non contano per la classifica vera.' : ''}`));
             if (!URL_HOUSEDAY) a.push(box('info', '<b>Modalità locale</b>: i punteggi restano solo su questo computer. Per raccoglierli da tutte le classi va collegato il foglio Google (istruzioni nel README).'));
             if (s.fase === 'concluso') a.push(box('info', `L'inserimento si è chiuso alle ${oraTesto(CALENDARIO.chiusura)}: questa è la classifica finale di oggi.`));
+            if (s.fase === 'aperto' && serveAccesso() && leggiPassword()) {
+                a.push(box('ok', 'Inserimento sbloccato su questo dispositivo fino alla chiusura del browser.<button type="button" class="btn-blocca" data-blocca>Blocca</button>'));
+            }
             return a.join('');
         }
 
@@ -1494,12 +1671,75 @@
 
         const chiaveNome = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
+        /* Letture con GET; scritture (e verifica della password) con POST: la password viaggia solo
+           nel corpo della richiesta (HTTPS), mai nell'indirizzo. Content-Type text/plain evita la
+           richiesta preliminare CORS, che Apps Script non gestisce. */
+        const SCRITTURE = ['verifica', 'classe', 'docente'];
         async function chiamaServer(params) {
             if (!URL_HOUSEDAY) return serverLocale(params);
-            const q = new URLSearchParams({ ...params, ...(PROVA ? { prova: '1' } : {}) });
-            const r = await fetch(URL_HOUSEDAY + '?' + q, { cache: 'no-store' });
+            const extra = PROVA ? { prova: '1' } : {};
+            const r = SCRITTURE.includes(params.action)
+                ? await fetch(URL_HOUSEDAY, {
+                    method: 'POST',
+                    cache: 'no-store',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ password: leggiPassword(), ...params, ...extra })
+                })
+                : await fetch(URL_HOUSEDAY + '?' + new URLSearchParams({ ...params, ...extra }), { cache: 'no-store' });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.json();
+        }
+
+        /* Password dei docenti: la controlla lo script (qui non c'è nessuna password scritta).
+           Dopo la verifica resta in questa scheda del browser finché non si chiude, o fino a "Blocca". */
+        const CHIAVE_PASSWORD = 'houseday_password';
+        const serveAccesso = () => !!URL_HOUSEDAY;   // in modalità locale non c'è nulla da proteggere
+        function leggiPassword() { try { return sessionStorage.getItem(CHIAVE_PASSWORD) || ''; } catch (e) { return ''; } }
+        function ricordaPassword(p) { try { sessionStorage.setItem(CHIAVE_PASSWORD, p); } catch (e) {} }
+        function dimenticaPassword() { try { sessionStorage.removeItem(CHIAVE_PASSWORD); } catch (e) {} }
+        const sbloccato = () => !serveAccesso() || !!leggiPassword();
+
+        function htmlAccesso(tipo) {
+            const pre = tipo === 'studenti' ? 'stud' : 'doc';
+            return `
+            <form class="glass-panel accesso" data-tipo="${tipo}">
+                <div class="chiuso-icona">${ICONA.lucchetto}</div>
+                <h3 class="accesso-titolo">Inserimento riservato ai docenti</h3>
+                <p class="chiuso-testo">Scrivi la password dei docenti per ${tipo === 'docenti' ? 'registrare la tua partecipazione' : 'inviare i punteggi della classe'}.
+                    Su questo dispositivo resta valida finché non chiudi il browser.</p>
+                <input id="${pre}-pwd" type="password" class="campo accesso-campo" autocomplete="current-password" aria-label="Password dei docenti" required>
+                <button type="submit" class="btn-azione btn-invia">Sblocca l'inserimento</button>
+                <div id="${pre}-pwd-esito"></div>
+            </form>`;
+        }
+
+        async function sblocca(tipo, form) {
+            const pre = tipo === 'studenti' ? 'stud' : 'doc';
+            const pwd = $(pre + '-pwd').value.trim();
+            if (!pwd) return esito(pre + '-pwd-esito', 'avviso', 'Scrivi la password.');
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            esito(pre + '-pwd-esito', 'info', 'Verifica in corso…');
+            try {
+                const r = await chiamaServer({ action: 'verifica', password: pwd });
+                if (!r.ok) throw r;
+                ricordaPassword(pwd);
+                mostraHouseDay(tipo);
+            } catch (e) {
+                esito(pre + '-pwd-esito', 'avviso', messaggioErrore(e));
+                btn.disabled = false;
+                $(pre + '-pwd').select();
+            }
+        }
+
+        // password rifiutata durante un invio (per esempio cambiata nel frattempo): si torna all'accesso
+        function passwordScaduta(tipo, e) {
+            if (!e || (e.errore !== 'password' && e.errore !== 'nopassword')) return false;
+            dimenticaPassword();
+            mostraHouseDay(tipo);
+            esito((tipo === 'studenti' ? 'stud' : 'doc') + '-pwd-esito', 'avviso',
+                e.errore === 'password' ? 'La password non è più valida: scrivila di nuovo. I dati inseriti non sono andati persi.' : messaggioErrore(e));
+            return true;
         }
 
         /* Modalità locale (URL_HOUSEDAY vuoto): stesso protocollo di houseday.gs, dati in localStorage.
@@ -1512,6 +1752,7 @@
             db.docenti = db.docenti || [];
             const oggi = adessoRoma().iso, ora = oraAttuale();
             const salva = () => { try { localStorage.setItem(CHIAVE_LOCALE, JSON.stringify(db)); } catch (e) {} };
+            if (p.action === 'verifica') return { ok: true };
             if (p.action === 'giornata') {
                 return p.tipo === 'docenti'
                     ? { ok: true, docenti: db.docenti.filter(r => r.data === p.data) }
@@ -1544,6 +1785,8 @@
             if (errore === 'vuoto') return 'Inserisci i membri e i punti di almeno una Casa.';
             if (errore === 'nome') return 'Scrivi il tuo nome e cognome.';
             if (errore === 'casa') return 'Scegli la tua Casa.';
+            if (errore === 'password') return 'Password dei docenti errata.';
+            if (errore === 'nopassword') return 'La password dei docenti non è ancora stata impostata: chi gestisce il foglio Google deve usare il menu House Day → Imposta password docenti.';
             return 'Invio non riuscito: controlla la connessione e riprova. I dati inseriti sono ancora qui.';
         }
 
@@ -1652,6 +1895,12 @@
                 return;
             }
             $(pre + '-aperto').classList.toggle('concluso', s.fase === 'concluso');
+            // finestra aperta ma password non ancora data: modulo nascosto, classifiche visibili
+            const bloccato = s.fase === 'aperto' && !sbloccato();
+            $(pre + '-aperto').classList.toggle('bloccato', bloccato);
+            $(pre + '-accesso').hidden = !bloccato;
+            if (bloccato && !$(pre + '-accesso').querySelector('form')) $(pre + '-accesso').innerHTML = htmlAccesso(tipo);
+            if (!bloccato) $(pre + '-accesso').innerHTML = '';
             $(pre + '-giornata-data').textContent = dataBreve(s.data);
             if (tipo === 'studenti') { renderGiornataStudenti(); aggiornaClasseScelta(); }
             else renderGiornataDocenti();
@@ -1758,7 +2007,7 @@
                 try { sessionStorage.removeItem(CHIAVE_BOZZA); } catch (e) {}
                 esito('stud-esito', 'ok', `Punteggi di ${etichettaClasse(id)} inviati alle ${esc(r.ora)}: la classe è spuntata nell'elenco.`);
             } catch (e) {
-                esito('stud-esito', 'avviso', messaggioErrore(e));
+                if (!passwordScaduta('studenti', e)) esito('stud-esito', 'avviso', messaggioErrore(e));
             } finally {
                 btn.disabled = false;
                 await caricaGiornata('studenti');   // aggiorna spunte e classifica, e riblocca il pulsante se serve
@@ -1888,7 +2137,7 @@
                 scegliCasaDocente('');
                 await caricaGiornata('docenti');
             } catch (e) {
-                esito('doc-esito', 'avviso', messaggioErrore(e));
+                if (!passwordScaduta('docenti', e)) esito('doc-esito', 'avviso', messaggioErrore(e));
             } finally {
                 btn.disabled = false;
             }
@@ -1933,10 +2182,188 @@
         }
 
         /* =========================================================
-           MENU E NAVIGAZIONE (#sfida, #studenti, #docenti: si possono aprire da un link diretto)
+           ALBO D'ORO (dal vecchio sito albo-doro-case.vercel.app)
            ========================================================= */
 
-        const TITOLI = { sfida: 'Sfide tra Case – in classe e tornei', studenti: 'House Day · Studenti', docenti: 'House Day · Docenti' };
+        // UNICA FONTE DATI: per aggiungere un anno basta una riga (casa = id della Casa)
+        const ALBO = [
+            { anno: '2015–2016', casa: 'querciaverde' },
+            { anno: '2016–2017', casa: 'cerogiallo' },
+            { anno: '2017–2018', casa: 'aquilablu' },
+            { anno: '2018–2019', casa: 'tassorosso' },
+            { anno: '2019–2020', casa: 'aquilablu' },
+            { anno: '2020–2021', casa: 'cerogiallo' },
+            { anno: '2021–2022', casa: 'aquilablu' },
+            { anno: '2022–2023', casa: 'cerogiallo' },
+            { anno: '2023–2024', casa: 'tassorosso' },
+            { anno: '2024–2025', casa: 'querciaverde' },
+            { anno: '2025–2026', casa: 'tassorosso' }
+        ];
+        const URL_REGISTRO = 'https://sacrafamiglia-orzinuovi.registroelettronico.com/mastercom/punti_skill_pubblica.php';
+        const VIDEO_CASE = '0o3AdPmgxv0';   // video YouTube delle Case
+
+        // anno scolastico in corso: da settembre ad agosto
+        function annoScolastico() {
+            const [y, m] = adessoRoma().iso.split('-').map(Number);
+            return m >= 9 ? `${y}–${y + 1}` : `${y - 1}–${y}`;
+        }
+
+        function initAlbo() {
+            const ultimo = ALBO.length - 1;
+            $('albo-anni').textContent = `${ALBO.length} anni`;
+            $('albo-vincitori').innerHTML = ALBO.map((r, i) => {
+                const t = teamById(r.casa);
+                return `<li class="vincitore${i === ultimo ? ' ultimo' : ''}">
+                    <span class="vincitore-anno">${r.anno}</span>
+                    <span class="chip-casa ${colors[t.color]}">${t.name}${i === ultimo ? ICONA.trofeo : ''}</span>
+                </li>`;
+            }).join('');
+
+            // vittorie per Casa: più titoli in alto, a parità l'ordine delle Case
+            const vittorie = teams.map(t => ({ team: t, n: ALBO.filter(r => r.casa === t.id).length })).sort((a, b) => b.n - a.n);
+            const max = Math.max(1, ...vittorie.map(v => v.n));
+            $('albo-dal').textContent = `dal ${ALBO[0].anno} al ${ALBO[ultimo].anno}`;
+            $('albo-vittorie').innerHTML = vittorie.map(v => `
+                <div class="vittoria ${colors[v.team.color]}">
+                    <span class="vittoria-nome">${v.team.name}</span>
+                    <span class="vittoria-barra"><i style="width:${v.n / max * 100}%"></i></span>
+                    <span class="vittoria-n">${v.n}</span>
+                </div>`).join('');
+
+            $('albo-anno-corrente').textContent = `Anno scolastico ${annoScolastico()} · punteggio progressivo`;
+            $('albo-registro').href = URL_REGISTRO;
+
+            const vincitore = teamById(ALBO[ultimo].casa);
+            $('menu-stato-albo').innerHTML = pill('grigio', `Ultimo vincitore: ${vincitore.name}`);
+            initVideo();
+        }
+
+        /* Classifica ufficiale delle Casate: il registro non la fa leggere al browser (niente CORS),
+           quindi passa dallo script (action=registro). Si aggiorna ogni 5 minuti mentre l'albo è aperto. */
+        async function caricaRegistro() {
+            try {
+                const r = await chiamaServer({ action: 'registro' });
+                if (!r.ok) throw r;
+                const righe = teams.map(t => ({ team: t, punti: r.case[t.id] || 0 })).sort((a, b) => b.punti - a.punti);
+                righe.forEach((x, i) => x.pos = i > 0 && x.punti === righe[i - 1].punti ? righe[i - 1].pos : i + 1);
+                const max = Math.max(1, ...righe.map(x => x.punti));
+                $('albo-ufficiale').innerHTML = righe.map(x => `
+                    <div class="ufficiale ${colors[x.team.color]}">
+                        <span class="pos ${classeBadge(x.pos, true)}">${x.pos}</span>
+                        <span class="vittoria-nome">${x.team.name}</span>
+                        <span class="vittoria-barra"><i style="width:${x.punti / max * 100}%"></i></span>
+                        <span class="vittoria-n">${x.punti}</span>
+                    </div>`).join('');
+                $('albo-ufficiale-ora').textContent = `aggiornata alle ${esc(r.ora)}`;
+            } catch (e) {
+                // senza script aggiornato o con il modulo spento: messaggio e link alla pagina del registro
+                const motivo = e && e.messaggio ? esc(e.messaggio) : 'Classifica non disponibile in questo momento';
+                $('albo-ufficiale').innerHTML = box('info', `${motivo}. <a class="link-fonte" href="${URL_REGISTRO}" target="_blank" rel="noopener">Apri la classifica nel registro</a>.`);
+                $('albo-ufficiale-ora').textContent = '';
+            }
+        }
+
+        /* Video YouTube senza distrattori: IFrame API con controls:0, iframe che non riceve clic,
+           copertina opaca prima di partire, in pausa e alla fine (nasconde anteprime e video correlati),
+           comandi solo nostri. L'API si carica solo la prima volta che si apre l'Albo d'Oro. */
+        const video = { player: null, pronto: false, caricato: false, timer: null };
+        const ICONA_VIDEO = {
+            play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+            pausa: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>',
+            audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+            muto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 6 6M22 9l-6 6"/></svg>'
+        };
+        const minSec = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+        function initVideo() {
+            $('albo-copertina').src = `https://i.ytimg.com/vi/${VIDEO_CASE}/hqdefault.jpg`;
+            $('video-play').innerHTML = ICONA_VIDEO.play;
+            $('video-muto').innerHTML = ICONA_VIDEO.audio;
+            $('video-play').addEventListener('click', () => {
+                if (!video.pronto) return;
+                if (video.player.getPlayerState() === YT.PlayerState.PLAYING) video.player.pauseVideo();
+                else video.player.playVideo();
+            });
+            $('albo-copertina').addEventListener('click', () => { if (video.pronto) video.player.playVideo(); });
+            $('video-stop').addEventListener('click', () => {
+                if (!video.pronto) return;
+                video.player.stopVideo();      // ferma e riporta all'inizio
+                fermaVideo();
+                $('video-avanzamento').value = 0;
+                $('video-tempo').textContent = '0:00';
+            });
+            $('video-avanzamento').addEventListener('input', e => {
+                if (!video.pronto) return;
+                const durata = video.player.getDuration() || 0;
+                video.player.seekTo(durata * e.target.value / 1000, true);
+            });
+            $('video-muto').addEventListener('click', () => {
+                if (!video.pronto) return;
+                const muto = video.player.isMuted();
+                if (muto) video.player.unMute(); else video.player.mute();
+                $('video-muto').innerHTML = muto ? ICONA_VIDEO.audio : ICONA_VIDEO.muto;
+                $('video-muto').setAttribute('aria-label', muto ? "Disattiva l'audio" : "Riattiva l'audio");
+            });
+        }
+
+        function caricaVideo() {
+            if (video.caricato) return;
+            video.caricato = true;
+            window.onYouTubeIframeAPIReady = () => {
+                video.player = new YT.Player('albo-yt', {
+                    videoId: VIDEO_CASE,
+                    playerVars: { controls: 0, fs: 0, rel: 0, modestbranding: 1, disablekb: 1, playsinline: 1, iv_load_policy: 3 },
+                    events: {
+                        onReady: () => {
+                            video.pronto = true;
+                            ['video-play', 'video-stop', 'video-avanzamento', 'video-muto'].forEach(id => $(id).disabled = false);
+                        },
+                        onStateChange: statoVideo,
+                        onError: () => esito('video-esito', 'avviso', `Il video non si può riprodurre qui: <a href="https://youtu.be/${VIDEO_CASE}" target="_blank" rel="noopener"><b>aprilo su YouTube</b></a>.`)
+                    }
+                });
+            };
+            if (window.YT && window.YT.Player) window.onYouTubeIframeAPIReady();
+            else {
+                const s = document.createElement('script');
+                s.src = 'https://www.youtube.com/iframe_api';
+                document.head.appendChild(s);
+            }
+        }
+
+        function statoVideo(e) {
+            const inCorso = e.data === YT.PlayerState.PLAYING;
+            // la copertina sparisce solo mentre il video scorre
+            if (inCorso || e.data === YT.PlayerState.BUFFERING) $('albo-copertina').hidden = true;
+            if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED || e.data === YT.PlayerState.CUED) $('albo-copertina').hidden = false;
+            $('video-play').innerHTML = inCorso ? ICONA_VIDEO.pausa : ICONA_VIDEO.play;
+            $('video-play').setAttribute('aria-label', inCorso ? 'Pausa' : 'Riproduci');
+            clearInterval(video.timer);
+            if (inCorso) video.timer = setInterval(aggiornaTempo, 500);
+            aggiornaTempo();
+        }
+        function aggiornaTempo() {
+            if (!video.pronto) return;
+            const t = video.player.getCurrentTime() || 0, durata = video.player.getDuration() || 0;
+            $('video-avanzamento').value = durata ? Math.round(t / durata * 1000) : 0;
+            $('video-tempo').textContent = durata ? `${minSec(t)} / ${minSec(durata)}` : minSec(t);
+        }
+        function fermaVideo() {
+            clearInterval(video.timer);
+            $('albo-copertina').hidden = false;
+            $('video-play').innerHTML = ICONA_VIDEO.play;
+            $('video-play').setAttribute('aria-label', 'Riproduci');
+        }
+        // uscendo dall'Albo d'Oro il video si mette in pausa
+        function pausaVideo() {
+            if (video.pronto && video.player.getPlayerState() === YT.PlayerState.PLAYING) video.player.pauseVideo();
+        }
+
+        /* =========================================================
+           MENU E NAVIGAZIONE (#studenti, #docenti, #sfida, #albo: si possono aprire da un link diretto)
+           ========================================================= */
+
+        const TITOLI = { sfida: 'Sfide tra Case – in classe e tornei', studenti: 'House Day · Studenti', docenti: 'House Day · Docenti', albo: "Albo d'Oro" };
 
         function vistaCorrente() {
             const v = location.hash.slice(1);
@@ -2023,7 +2450,12 @@
             document.title = v === 'menu' ? 'House Day' : `${TITOLI[v]} — House Day`;
             if (v === 'menu') mostraMenu();
             else $('barra-titolo').textContent = TITOLI[v];
-            if (v === 'sfida') { $('barra-data').textContent = ''; $('barra-stato').innerHTML = ''; }
+            if (v === 'sfida' || v === 'albo') { $('barra-data').textContent = ''; $('barra-stato').innerHTML = ''; }
+            if (v === 'albo') {
+                caricaVideo();
+                caricaRegistro();
+                timerGiornata = setInterval(caricaRegistro, 5 * 60000);
+            } else pausaVideo();
             if (v === 'studenti' || v === 'docenti') mostraHouseDay(v);
             window.scrollTo(0, 0);
         }
@@ -2042,7 +2474,20 @@
         initSfida();
         initStudenti();
         initDocenti();
+        initAlbo();
         window.addEventListener('hashchange', vai);
+        // accesso con password e pulsante "Blocca" (i moduli vengono creati quando servono)
+        document.addEventListener('submit', e => {
+            const form = e.target.closest('form.accesso');
+            if (!form) return;
+            e.preventDefault();
+            sblocca(form.dataset.tipo, form);
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('[data-blocca]')) return;
+            dimenticaPassword();
+            mostraHouseDay(vistaCorrente());
+        });
         document.addEventListener('visibilitychange', () => { if (!document.hidden) { controllaOrario(); const v = vistaCorrente(); if (v === 'studenti' || v === 'docenti') caricaGiornata(v); else if (v === 'menu') caricaHome(); } });
         setInterval(controllaOrario, 15000);
         vai();
