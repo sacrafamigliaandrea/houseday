@@ -96,6 +96,11 @@
         }
         main { flex-grow: 1; width: 100%; }
 
+        /* La pagina scorre solo in verticale: se un contenuto fosse più largo dello schermo,
+           viene tagliato invece di far scorrere tutta la pagina di lato */
+        html, body { max-width: 100%; overflow-x: hidden; }
+        @supports (overflow: clip) { html, body { overflow-x: clip; } }
+
         /* Pannello chiaro semitrasparente; .card-classifica, .pannello-casa ne ridefiniscono sfondo, bordo e ombra */
         .glass-panel {
             background: rgba(255, 255, 255, 0.96);
@@ -443,7 +448,7 @@
             width: 5rem;
             background-color: transparent;
             color: var(--ambra-300);
-            font-size: .75rem;
+            font-size: 16px;   /* sotto i 16 px l'iPhone ingrandisce la pagina quando si tocca il campo */
             line-height: 1rem;
             font-weight: 800;
             letter-spacing: .025em;
@@ -603,7 +608,8 @@
         .vista-hd { width: 100%; max-width: 1680px; margin: 0 auto; padding: .75rem; }
         .avvisi { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
         .avvisi:empty { display: none; }
-        .hd-griglia { display: grid; gap: 1.25rem; align-items: flex-start; }
+        /* minmax(0, 1fr): sul telefono la colonna non si allarga oltre lo schermo per far posto ai contenuti */
+        .hd-griglia { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; align-items: flex-start; }
         .riquadro { border-radius: 1rem; padding: .875rem; }
         .stud-form { display: flex; flex-direction: column; gap: .75rem; }
         .scelta-classe { display: flex; flex-wrap: wrap; align-items: center; column-gap: .75rem; row-gap: .5rem; }
@@ -719,7 +725,8 @@
         /* in primo piano la classifica progressiva; sotto, più leggeri, Albo d'Oro, vittorie e video */
         .vista-albo { width: 100%; max-width: 72rem; margin: 0 auto; padding: .75rem; }
         .menu-etichetta.secondarie { margin-top: 1.75rem; }
-        .albo-griglia { display: grid; gap: 1.25rem; align-items: flex-start; }
+        /* minmax(0, 1fr): la barra del video ha una larghezza minima propria e allargava la colonna oltre lo schermo */
+        .albo-griglia { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; align-items: flex-start; }
         .albo-destra { gap: 1.25rem; }
         .albo-elenco { margin-top: .75rem; }
         .video-esito { margin-top: .5rem; }
