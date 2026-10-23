@@ -2012,7 +2012,10 @@
         }
 
         /* Docenti: per ogni Casa membri = docenti registrati, punti = colori + frutta (massimo 2 a testa).
-           Stesso calcolo delle classi: efficienza, poi punti. */
+           Conta solo l'efficienza: a parità di percentuale le Case sono pari merito (stessa posizione,
+           stessi punti 10/8/6/4), qualunque sia il numero di docenti. Nessuno spareggio sui punti,
+           che premierebbe la Casa con più docenti. Le Case senza docenti restano in fondo, senza posizione.
+           (Il calcolo delle classi, calcolaClasse, resta quello di sempre.) */
         function aggregaDocenti(docenti) {
             const state = {};
             teams.forEach(t => state[t.id] = { members: 0, points: 0 });
@@ -2021,7 +2024,15 @@
                 state[d.casa].members++;
                 state[d.casa].points += (d.colori ? 1 : 0) + (d.frutta ? 1 : 0);
             });
-            return calcolaClasse(state);
+            const results = teams.map(team => {
+                const { members, points } = state[team.id], maxPoints = members * 2;
+                return { team, members, points, maxPoints, efficiency: members > 0 ? (points / maxPoints) * 100 : 0, hasData: members > 0 };
+            });
+            // stessa percentuale confrontata senza arrotondamenti: 2/3 e 4/6 sono pari
+            const pari = (a, b) => a.points * b.maxPoints === b.points * a.maxPoints;
+            const inGara = results.filter(r => r.hasData).sort((a, b) => b.efficiency - a.efficiency);   // a pari merito resta l'ordine delle Case
+            inGara.forEach((r, i) => r.actualRank = i > 0 && pari(r, inGara[i - 1]) ? inGara[i - 1].actualRank : i + 1);
+            return inGara.concat(results.filter(r => !r.hasData));
         }
 
         /* Punti alla classifica dell'House Day dalla classifica docenti: 10 / 8 / 6 / 4 alla prima,
